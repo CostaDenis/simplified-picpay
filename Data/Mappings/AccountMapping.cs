@@ -44,6 +44,13 @@ namespace simplified_picpay.Data.Mappings
                 .HasColumnType("numeric(18,2)")
                 .IsRequired(true);
 
+            builder.Property(a => a.AccountType)
+                .HasColumnName("account_type")
+                .HasColumnType("varchar")
+                .HasMaxLength(11)
+                .HasConversion<string>()
+                .IsRequired(true);
+
             builder.Property(a => a.IsActive)
                 .HasColumnName("is_active")
                 .HasColumnType("boolean")
