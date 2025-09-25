@@ -8,7 +8,7 @@ namespace simplified_picpay.DTOs
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public decimal CurrentBalance { get; set; }
-        public AccountType AccountType { get; set; }
+        public string AccountType { get; set; } = string.Empty;
         public string Document { get; set; } = string.Empty;
     }
 }

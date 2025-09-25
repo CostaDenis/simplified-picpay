@@ -9,7 +9,6 @@ namespace simplified_picpay.Repositories.Abstractions
 {
     public interface IAccountRepository
     {
-        Task<Account> CreateAsync(CreateAccountDTO createAccountDTO, CancellationToken cancellationToken = default);
-
+        Task<Account> CreateAsync(Account account, CancellationToken cancellationToken = default);
     }
 }

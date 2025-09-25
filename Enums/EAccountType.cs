@@ -1,6 +1,6 @@
 namespace simplified_picpay.Enums
 {
-    public enum AccountType
+    public enum EAccountType
     {
         User,
         Storekeeper

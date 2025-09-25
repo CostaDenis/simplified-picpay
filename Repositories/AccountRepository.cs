@@ -7,6 +7,7 @@ using simplified_picpay.DTOs;
 using simplified_picpay.Enums;
 using simplified_picpay.Models;
 using simplified_picpay.Repositories.Abstractions;
+using simplified_picpay.Services.Abstractions;
 
 namespace simplified_picpay.Repositories
 {
@@ -14,9 +15,25 @@ namespace simplified_picpay.Repositories
     {
         private readonly AppDbContext _context = context;
 
-        public Task<Account> CreateAsync(CreateAccountDTO createAccountDTO, CancellationToken cancellationToken = default)
+
+        public async Task<Account> CreateAsync(Account account, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            // var account = new Account
+            // {
+            //     FullName = createAccountDTO.FullName,
+            //     Email = createAccountDTO.Email,
+            //     PasswordHash = createAccountDTO.Password,
+            //     CurrentBalance = createAccountDTO.CurrentBalance,
+            //     AccountType = createAccountDTO.AccountType,
+            //     Document = createAccountDTO.Document
+            // };
+
+            await _context.Accounts.AddAsync(account, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return account;
         }
+
+
     }
 }
