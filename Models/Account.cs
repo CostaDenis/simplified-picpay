@@ -9,5 +9,8 @@ namespace simplified_picpay.Models
         public decimal CurrentBalance { get; set; }
         public Storekeeper? Storekeeper { get; set; }
         public User? User { get; set; }
+        public List<Transaction>? Payments { get; set; }
+        public List<Transaction> Receipts { get; set; } = new();
+        public bool IsActive { get; set; } = true;
     }
 }

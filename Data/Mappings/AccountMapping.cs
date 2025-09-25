@@ -43,6 +43,11 @@ namespace simplified_picpay.Data.Mappings
                 .HasColumnName("current_balance")
                 .HasColumnType("numeric(18,2)")
                 .IsRequired(true);
+
+            builder.Property(a => a.IsActive)
+                .HasColumnName("is_active")
+                .HasColumnType("boolean")
+                .IsRequired(true);
         }
     }
 }
