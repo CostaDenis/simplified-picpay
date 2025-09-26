@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
-using simplified_picpay.DTOs;
 using simplified_picpay.Enums;
 using simplified_picpay.Models;
 using simplified_picpay.Services.Abstractions;

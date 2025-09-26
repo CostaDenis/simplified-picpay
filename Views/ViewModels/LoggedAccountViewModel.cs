@@ -14,6 +14,7 @@ namespace simplified_picpay.Views.ViewModels
         public decimal CurrentBalance { get; set; }
         public string AccountType { get; set; } = string.Empty;
         public string Document { get; set; } = string.Empty;
+        public string Token { get; set; } = string.Empty;
 
     }
 }

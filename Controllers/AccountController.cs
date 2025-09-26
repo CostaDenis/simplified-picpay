@@ -10,15 +10,16 @@ namespace simplified_picpay.Controllers
 {
     [ApiController]
     [Route("accounts")]
-    public class AccountController(IAccountRepository repository, IAccountService service) : ControllerBase
+    public class AccountController(IAccountRepository repository, IAccountService AccountService) : ControllerBase
     {
         private readonly IAccountRepository _repository = repository;
-        private readonly IAccountService _service = service;
+        private readonly IAccountService _accountService = AccountService;
 
         [HttpPost]
         [Route("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO,
+                                    [FromServices] ITokenService _tokenService,
                                     CancellationToken cancellationToken)
         {
             var account = await _repository.LoginAsync(loginDTO.Email, cancellationToken);
@@ -26,8 +27,10 @@ namespace simplified_picpay.Controllers
             if (account == null)
                 return Unauthorized(new ResultViewModel<string>("Acesso negado!"));
 
-            if (!_service.CheckPassword(account, account.PasswordHash, loginDTO.Password))
-                return Unauthorized(new ResultViewModel<string>("Acesso negado!S"));
+            if (!_accountService.CheckPassword(account, account.PasswordHash, loginDTO.Password))
+                return Unauthorized(new ResultViewModel<string>("Acesso negado!"));
+
+            var token = _tokenService.GenerateTokenJwt(account.Id, account.Email, account.AccountType);
 
             return Ok(new LoggedAccountViewModel
             {
@@ -36,7 +39,8 @@ namespace simplified_picpay.Controllers
                 Email = account.Email,
                 CurrentBalance = account.CurrentBalance,
                 AccountType = account.AccountType,
-                Document = account.Document
+                Document = account.Document,
+                Token = token
             });
 
         }
@@ -59,17 +63,18 @@ namespace simplified_picpay.Controllers
                 Document = createAccountDTO.Document
             };
 
-            if (!_service.VerifyAccountType(account))
+            if (!_accountService.VerifyAccountType(account))
                 return BadRequest(new ResultViewModel<string>("Só está disponível conta de User e Storekeeper!"));
 
-            if (!_service.VerifyDocument(account))
+            if (!_accountService.VerifyDocument(account))
                 return BadRequest(new ResultViewModel<string>("Verifique o documento!"));
 
-            var passwordHash = _service.PasswordHasher(account, account.PasswordHash);
+            var passwordHash = _accountService.PasswordHasher(account, account.PasswordHash);
             account.PasswordHash = passwordHash;
 
             try
             {
+                await _repository.CreateAsync(account);
                 return Ok(new ResultViewModel<Account>(account));
             }
             catch
