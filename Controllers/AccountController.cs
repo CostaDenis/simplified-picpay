@@ -33,9 +33,17 @@ namespace simplified_picpay.Controllers
             if (!_accountService.CheckPassword(account, account.PasswordHash, loginDTO.Password))
                 return Unauthorized(new ResultViewModel<string>("Acesso negado!"));
 
+            if (account.IsActive == false)
+            {
+                if (!await _accountService.EnableAccount(account.Id, cancellationToken))
+                    return StatusCode(500, new ResultViewModel<string>("Erro interno ao reativar sua conta!"));
+
+                return Ok(new ResultViewModel<string>(data: "Conta reativada!"));
+            }
+
             var token = _tokenService.GenerateTokenJwt(account.Id, account.Email, account.AccountType);
 
-            return Ok(new LoggedAccountViewModel
+            return Ok(new ResultViewModel<LoggedAccountViewModel>(new LoggedAccountViewModel
             {
                 Id = account.Id,
                 FullName = account.FullName,
@@ -44,7 +52,7 @@ namespace simplified_picpay.Controllers
                 AccountType = account.AccountType,
                 Document = account.Document,
                 Token = token
-            });
+            }));
 
         }
 
@@ -108,6 +116,23 @@ namespace simplified_picpay.Controllers
             catch
             {
                 return StatusCode(500, new ResultViewModel<string>("Erro interno ao atualizar a conta"));
+            }
+        }
+
+        [HttpPut]
+        [Route("disable-account")]
+        public async Task<IActionResult> DisableAccount(CancellationToken cancellationToken)
+        {
+            var id = _tokenService.GetAccounId(this.HttpContext);
+
+            try
+            {
+                await _repository.DisableAccountAsync(id, cancellationToken);
+                return Ok(new ResultViewModel<string>(data: "Conta desativada"));
+            }
+            catch
+            {
+                return StatusCode(500, new ResultViewModel<string>("Erro interno ao desativar a conta"));
             }
         }
     }

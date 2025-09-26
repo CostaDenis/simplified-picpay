@@ -8,5 +8,7 @@ namespace simplified_picpay.Repositories.Abstractions
         Task<Account?> GetAccountByIdAsync(Guid id);
         Task<Account> CreateAsync(Account account, CancellationToken cancellationToken = default);
         Account Update(Account account);
+        Task DisableAccountAsync(Guid id, CancellationToken cancellationToken = default);
+        Task EnableAccountAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }

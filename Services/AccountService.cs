@@ -1,12 +1,15 @@
 using Microsoft.AspNetCore.Identity;
 using simplified_picpay.Enums;
 using simplified_picpay.Models;
+using simplified_picpay.Repositories.Abstractions;
 using simplified_picpay.Services.Abstractions;
 
 namespace simplified_picpay.Services
 {
-    public class AccountService : IAccountService
+    public class AccountService(IAccountRepository accountRepository) : IAccountService
     {
+        private readonly IAccountRepository _accountRepository = accountRepository;
+
         public bool VerifyDocument(Account account)
         {
             var accountType = account.AccountType;
@@ -44,6 +47,19 @@ namespace simplified_picpay.Services
             if (result == PasswordVerificationResult.Failed)
                 return false;
 
+            return true;
+        }
+
+        public async Task<bool> EnableAccount(Guid id, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await _accountRepository.EnableAccountAsync(id, cancellationToken);
+            }
+            catch
+            {
+                return false;
+            }
             return true;
         }
     }

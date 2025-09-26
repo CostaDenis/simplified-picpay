@@ -32,5 +32,22 @@ namespace simplified_picpay.Repositories
             return account;
         }
 
+        public async Task DisableAccountAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var account = await GetAccountByIdAsync(id);
+            account!.IsActive = false;
+
+            _context.Accounts.Update(account);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task EnableAccountAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var account = await GetAccountByIdAsync(id);
+            account!.IsActive = true;
+
+            _context.Accounts.Update(account);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
     }
 }
