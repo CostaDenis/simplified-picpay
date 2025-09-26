@@ -13,13 +13,22 @@ namespace simplified_picpay.Services
 {
     public class AccountService : IAccountService
     {
-        public bool VerifyDocument(CreateAccountDTO createAccountDTO)
+        public bool VerifyDocument(Account account)
         {
-            var accountType = createAccountDTO.AccountType.ToString();
-            var document = createAccountDTO.Document.ToString();
+            var accountType = account.AccountType;
+            var document = account.Document;
 
             if (accountType == EAccountType.Storekeeper.ToString() && document.Length != 14 ||
                 accountType == EAccountType.User.ToString() && document.Length != 11)
+                return false;
+
+            return true;
+        }
+
+        public bool VerifyAccountType(Account account)
+        {
+            if (account.AccountType.ToUpper() != EAccountType.Storekeeper.ToString().ToUpper() &&
+                account.AccountType.ToUpper() != EAccountType.User.ToString().ToUpper())
                 return false;
 
             return true;
@@ -33,8 +42,15 @@ namespace simplified_picpay.Services
             return passwordHash;
         }
 
-        public string ConvertAccountType(Account account)
-            => account.AccountType.ToString();
+        public bool CheckPassword(Account account, string hashedPassword, string providerPassword)
+        {
+            var hasher = new PasswordHasher<Account>();
+            var result = hasher.VerifyHashedPassword(account, hashedPassword, providerPassword);
 
+            if (result == PasswordVerificationResult.Failed)
+                return false;
+
+            return true;
+        }
     }
 }

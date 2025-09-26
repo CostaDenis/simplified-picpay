@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using simplified_picpay.Data;
 using simplified_picpay.DTOs;
 using simplified_picpay.Enums;
@@ -16,24 +17,17 @@ namespace simplified_picpay.Repositories
         private readonly AppDbContext _context = context;
 
 
+        public async Task<Account?> LoginAsync(string email, CancellationToken cancellationToken = default)
+            => await _context.Accounts.FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
+
+
         public async Task<Account> CreateAsync(Account account, CancellationToken cancellationToken = default)
         {
-            // var account = new Account
-            // {
-            //     FullName = createAccountDTO.FullName,
-            //     Email = createAccountDTO.Email,
-            //     PasswordHash = createAccountDTO.Password,
-            //     CurrentBalance = createAccountDTO.CurrentBalance,
-            //     AccountType = createAccountDTO.AccountType,
-            //     Document = createAccountDTO.Document
-            // };
-
             await _context.Accounts.AddAsync(account, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
             return account;
         }
-
 
     }
 }

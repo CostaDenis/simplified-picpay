@@ -9,8 +9,9 @@ namespace simplified_picpay.Services.Abstractions
 {
     public interface IAccountService
     {
-        public bool VerifyDocument(CreateAccountDTO createAccountDTO);
+        public bool VerifyDocument(Account account);
+        public bool VerifyAccountType(Account account);
         public string PasswordHasher(Account account, string password);
-        public string ConvertAccountType(Account account);
+        public bool CheckPassword(Account account, string hashedPassword, string providerPassword);
     }
 }
