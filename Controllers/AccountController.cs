@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using simplified_picpay.DTOs;
 using simplified_picpay.Models;
 using simplified_picpay.Repositories.Abstractions;
@@ -9,17 +10,19 @@ using simplified_picpay.Views.ViewModels;
 namespace simplified_picpay.Controllers
 {
     [ApiController]
+    [Authorize(Roles = "user, storekeeper")]
     [Route("accounts")]
-    public class AccountController(IAccountRepository repository, IAccountService AccountService) : ControllerBase
+    public class AccountController(IAccountRepository repository,
+    IAccountService AccountService, ITokenService tokenService) : ControllerBase
     {
         private readonly IAccountRepository _repository = repository;
         private readonly IAccountService _accountService = AccountService;
+        private readonly ITokenService _tokenService = tokenService;
 
         [HttpPost]
         [Route("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO,
-                                    [FromServices] ITokenService _tokenService,
                                     CancellationToken cancellationToken)
         {
             var account = await _repository.LoginAsync(loginDTO.Email, cancellationToken);
@@ -45,8 +48,6 @@ namespace simplified_picpay.Controllers
 
         }
 
-
-
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> CreateAsync([FromBody] CreateAccountDTO createAccountDTO,
@@ -59,7 +60,7 @@ namespace simplified_picpay.Controllers
                 Email = createAccountDTO.Email,
                 PasswordHash = createAccountDTO.Password,
                 CurrentBalance = createAccountDTO.CurrentBalance,
-                AccountType = createAccountDTO.AccountType,
+                AccountType = createAccountDTO.AccountType.ToLower(),
                 Document = createAccountDTO.Document
             };
 
@@ -74,12 +75,39 @@ namespace simplified_picpay.Controllers
 
             try
             {
-                await _repository.CreateAsync(account);
-                return Ok(new ResultViewModel<Account>(account));
+                return Ok(new ResultViewModel<Account>(await _repository.CreateAsync(account, cancellationToken)));
             }
             catch
             {
                 return StatusCode(500, new ResultViewModel<string>("Erro interno ao criar a conta"));
+            }
+        }
+
+        [HttpPut]
+        public IActionResult Update([FromBody] UpdateAccountDTO updateAccountDTO)
+        {
+            var id = _tokenService.GetAccounId(this.HttpContext);
+            var account = new Account
+            {
+                Id = id,
+                Email = updateAccountDTO.Email,
+                PasswordHash = updateAccountDTO.Password
+            };
+
+            var passwordHash = _accountService.PasswordHasher(account, account.PasswordHash);
+            account.PasswordHash = passwordHash;
+
+            try
+            {
+                return Ok(_repository.Update(account));
+            }
+            catch (DbUpdateException)
+            {
+                return Conflict(new ResultViewModel<string>("Email já resgitrado na aplicação!"));
+            }
+            catch
+            {
+                return StatusCode(500, new ResultViewModel<string>("Erro interno ao atualizar a conta"));
             }
         }
     }

@@ -12,8 +12,8 @@ namespace simplified_picpay.Services
             var accountType = account.AccountType;
             var document = account.Document;
 
-            if (accountType == EAccountType.Storekeeper.ToString() && document.Length != 14 ||
-                accountType == EAccountType.User.ToString() && document.Length != 11)
+            if (accountType.ToLower() == EAccountType.Storekeeper.ToString().ToLower() && document.Length != 14 ||
+                accountType.ToLower() == EAccountType.User.ToString().ToLower() && document.Length != 11)
                 return false;
 
             return true;
@@ -21,8 +21,8 @@ namespace simplified_picpay.Services
 
         public bool VerifyAccountType(Account account)
         {
-            if (account.AccountType.ToUpper() != EAccountType.Storekeeper.ToString().ToUpper() &&
-                account.AccountType.ToUpper() != EAccountType.User.ToString().ToUpper())
+            if (account.AccountType.ToLower() != EAccountType.Storekeeper.ToString().ToLower() &&
+                account.AccountType.ToLower() != EAccountType.User.ToString().ToLower())
                 return false;
 
             return true;

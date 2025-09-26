@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using simplified_picpay.DTOs;
 using simplified_picpay.Models;
 
 namespace simplified_picpay.Repositories.Abstractions
@@ -10,6 +5,8 @@ namespace simplified_picpay.Repositories.Abstractions
     public interface IAccountRepository
     {
         Task<Account?> LoginAsync(string email, CancellationToken cancellationToken = default);
+        Task<Account?> GetAccountByIdAsync(Guid id);
         Task<Account> CreateAsync(Account account, CancellationToken cancellationToken = default);
+        Account Update(Account account);
     }
 }
