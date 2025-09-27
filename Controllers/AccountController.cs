@@ -67,7 +67,7 @@ namespace simplified_picpay.Controllers
                 FullName = createAccountDTO.FullName,
                 Email = createAccountDTO.Email,
                 PasswordHash = createAccountDTO.Password,
-                CurrentBalance = createAccountDTO.CurrentBalance,
+                CurrentBalance = 0.0M,
                 AccountType = createAccountDTO.AccountType.ToLower(),
                 Document = createAccountDTO.Document
             };
@@ -116,6 +116,59 @@ namespace simplified_picpay.Controllers
             catch
             {
                 return StatusCode(500, new ResultViewModel<string>("Erro interno ao atualizar a conta"));
+            }
+        }
+
+        [HttpPut]
+        [Route("add-founds")]
+        public async Task<IActionResult> AddFounds([FromBody] UpdateFoundsDTO updateFoundsDTO, CancellationToken cancellationToken)
+        {
+            if (updateFoundsDTO.Amount <= 0 || updateFoundsDTO.Amount > decimal.MaxValue)
+                return BadRequest(new ResultViewModel<string>("A quantia a ser adicionada deve estar entre 1 e 79228162514264337593543950335!"));
+
+            var id = _tokenService.GetAccounId(this.HttpContext);
+            var account = await _repository.GetAccountByIdAsync(id, cancellationToken);
+            var amount = updateFoundsDTO.Amount;
+            var newBalance = account!.CurrentBalance + amount;
+
+            account!.CurrentBalance = newBalance;
+
+            try
+            {
+                _repository.UpdateFounds(account);
+                return Ok(new ResultViewModel<Account>(account));
+            }
+            catch
+            {
+                return StatusCode(500, new ResultViewModel<string>("Erro interno ao atualizar saldo!"));
+            }
+        }
+
+        [HttpPut]
+        [Route("remove-founds")]
+        public async Task<IActionResult> RemoveFounds([FromBody] UpdateFoundsDTO updateFoundsDTO, CancellationToken cancellationToken)
+        {
+            if (updateFoundsDTO.Amount >= 0 || updateFoundsDTO.Amount < decimal.MinValue)
+                return BadRequest(new ResultViewModel<string>("A quantia a ser removida deve estar entre -1 e -79228162514264337593543950335!"));
+
+            var id = _tokenService.GetAccounId(this.HttpContext);
+            var account = await _repository.GetAccountByIdAsync(id, cancellationToken);
+            var amount = updateFoundsDTO.Amount;
+            var newBalance = account!.CurrentBalance + amount;
+
+            if (newBalance < 0)
+                return BadRequest(new ResultViewModel<string>("Saldo insuficiente"));
+
+            account!.CurrentBalance = newBalance;
+
+            try
+            {
+                _repository.UpdateFounds(account);
+                return Ok(new ResultViewModel<Account>(account));
+            }
+            catch
+            {
+                return StatusCode(500, new ResultViewModel<string>("Erro interno ao atualizar saldo!"));
             }
         }
 

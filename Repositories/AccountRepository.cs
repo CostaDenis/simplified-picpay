@@ -13,7 +13,7 @@ namespace simplified_picpay.Repositories
         public async Task<Account?> LoginAsync(string email, CancellationToken cancellationToken = default)
             => await _context.Accounts.FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
 
-        public async Task<Account?> GetAccountByIdAsync(Guid id)
+        public async Task<Account?> GetAccountByIdAsync(Guid id, CancellationToken cancellationToken = default)
             => await _context.Accounts.FirstOrDefaultAsync(x => x.Id == id);
 
         public async Task<Account> CreateAsync(Account account, CancellationToken cancellationToken = default)
@@ -25,6 +25,14 @@ namespace simplified_picpay.Repositories
         }
 
         public Account Update(Account account)
+        {
+            _context.Accounts.Update(account);
+            _context.SaveChanges();
+
+            return account;
+        }
+
+        public Account UpdateFounds(Account account)
         {
             _context.Accounts.Update(account);
             _context.SaveChanges();
@@ -49,5 +57,6 @@ namespace simplified_picpay.Repositories
             _context.Accounts.Update(account);
             await _context.SaveChangesAsync(cancellationToken);
         }
+
     }
 }
