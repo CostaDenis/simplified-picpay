@@ -1,0 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace simplified_picpay.DTOs.Transaction
+{
+    public class CreateTransactionDTO
+    {
+        public Guid PayeeId { get; set; }
+        public decimal Value { get; set; }
+    }
+}
