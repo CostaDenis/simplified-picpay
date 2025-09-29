@@ -23,6 +23,26 @@ namespace simplified_picpay.Data.Mappings
                 .HasMaxLength(100)
                 .IsRequired(true);
 
+            builder.Property(a => a.DisplayName)
+                .HasColumnName("display_name")
+                .HasColumnType("varchar")
+                .HasMaxLength(30)
+                .IsRequired(true);
+
+            builder.HasIndex(a => a.DisplayName)
+                .IsUnique(true)
+                .HasDatabaseName("ux_accounts_display_name");
+
+            builder.Property(a => a.PublicId)
+                .HasColumnName("public_id")
+                .HasColumnType("varchar")
+                .HasMaxLength(36)
+                .IsRequired(true);
+
+            builder.HasIndex(a => a.PublicId)
+                .IsUnique(true)
+                .HasDatabaseName("ux_accounts_public_id");
+
             builder.Property(a => a.Email)
                 .HasColumnName("email")
                 .HasColumnType("varchar")

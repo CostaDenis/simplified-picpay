@@ -6,6 +6,8 @@ namespace simplified_picpay.Models
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public string FullName { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = default!;
+        public string PublicId { get; set; } = "pay_" + Guid.NewGuid().ToString("N");
         public string Email { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
         public decimal CurrentBalance { get; set; }
@@ -14,5 +16,7 @@ namespace simplified_picpay.Models
         public List<Transaction>? Payments { get; set; }
         public List<Transaction> Receipts { get; set; } = new();
         public bool IsActive { get; set; } = true;
+
+
     }
 }

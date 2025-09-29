@@ -1,6 +1,8 @@
+using System.Data.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using simplified_picpay.DTOs;
 using simplified_picpay.Models;
 using simplified_picpay.Repositories.Abstractions;
@@ -23,7 +25,7 @@ namespace simplified_picpay.Controllers
         [Route("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO,
-                                    CancellationToken cancellationToken)
+                                                    CancellationToken cancellationToken)
         {
             var account = await _repository.LoginAsync(loginDTO.Email, cancellationToken);
 
@@ -47,6 +49,8 @@ namespace simplified_picpay.Controllers
             {
                 Id = account.Id,
                 FullName = account.FullName,
+                DisplayName = account.DisplayName,
+                PublicId = account.PublicId,
                 Email = account.Email,
                 CurrentBalance = account.CurrentBalance,
                 AccountType = account.AccountType,
@@ -57,14 +61,38 @@ namespace simplified_picpay.Controllers
         }
 
         [HttpPost]
+        [Route("search")]
+        public async Task<IActionResult> SearchAccountByDisplayNameAsync([FromBody] SearchDisplayNameDTO searchDisplayNameDTO,
+                                                                            CancellationToken cancellationToken)
+        {
+            var account = await _repository.SearchAccountByDisplayNameAsync(searchDisplayNameDTO.DisplayName, cancellationToken);
+            string accountIsActive = "Conta ativa";
+
+            if (account == null)
+                return NotFound(new ResultViewModel<string>("Conta não encontrada!"));
+
+            if (!account.IsActive)
+                accountIsActive = "Conta desativada";
+
+            return Ok(new ResultViewModel<AccountSummaryViewModel>(new AccountSummaryViewModel
+            {
+                DisplayName = account.DisplayName,
+                PublicId = account.PublicId,
+                AccountType = account.AccountType,
+                IsActive = accountIsActive
+            }));
+        }
+
+        [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> CreateAsync([FromBody] CreateAccountDTO createAccountDTO,
-                                            CancellationToken cancellationToken)
+                                                        CancellationToken cancellationToken)
         {
 
             var account = new Account
             {
                 FullName = createAccountDTO.FullName,
+                DisplayName = createAccountDTO.DisplayName,
                 Email = createAccountDTO.Email,
                 PasswordHash = createAccountDTO.Password,
                 CurrentBalance = 0.0M,
@@ -84,6 +112,10 @@ namespace simplified_picpay.Controllers
             try
             {
                 return Ok(new ResultViewModel<Account>(await _repository.CreateAsync(account, cancellationToken)));
+            }
+            catch (DbException)
+            {
+                return StatusCode(500, new ResultViewModel<string>("Esse email já esta registrado!"));
             }
             catch
             {
@@ -121,7 +153,8 @@ namespace simplified_picpay.Controllers
 
         [HttpPut]
         [Route("add-founds")]
-        public async Task<IActionResult> AddFounds([FromBody] UpdateFoundsDTO updateFoundsDTO, CancellationToken cancellationToken)
+        public async Task<IActionResult> AddFounds([FromBody] UpdateFoundsDTO updateFoundsDTO,
+                                                        CancellationToken cancellationToken)
         {
             if (updateFoundsDTO.Amount <= 0 || updateFoundsDTO.Amount > decimal.MaxValue)
                 return BadRequest(new ResultViewModel<string>("A quantia a ser adicionada deve estar entre 1 e 79228162514264337593543950335!"));
@@ -146,7 +179,8 @@ namespace simplified_picpay.Controllers
 
         [HttpPut]
         [Route("remove-founds")]
-        public async Task<IActionResult> RemoveFounds([FromBody] UpdateFoundsDTO updateFoundsDTO, CancellationToken cancellationToken)
+        public async Task<IActionResult> RemoveFounds([FromBody] UpdateFoundsDTO updateFoundsDTO,
+                                                        CancellationToken cancellationToken)
         {
             if (updateFoundsDTO.Amount >= 0 || updateFoundsDTO.Amount < decimal.MinValue)
                 return BadRequest(new ResultViewModel<string>("A quantia a ser removida deve estar entre -1 e -79228162514264337593543950335!"));
