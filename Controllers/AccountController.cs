@@ -1,7 +1,5 @@
-using System.Data.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using simplified_picpay.DTOs;
 using simplified_picpay.Models;
 using simplified_picpay.Repositories.Abstractions;
@@ -80,6 +78,8 @@ namespace simplified_picpay.Controllers
             var account = new Account
             {
                 Id = id,
+                FullName = updateAccountDTO.FullName,
+                DisplayName = updateAccountDTO.DisplayName,
                 Email = updateAccountDTO.Email,
                 PasswordHash = updateAccountDTO.Password
             };
@@ -113,7 +113,7 @@ namespace simplified_picpay.Controllers
         {
             var id = _tokenService.GetAccounId(this.HttpContext);
             var account = await _AccountRepository.GetAccountByIdAsync(id, cancellationToken);
-            var result = _accountService.AddFounds(account!, updateFoundsDTO.Amount);
+            var result = _accountService.RemoveFounds(account!, updateFoundsDTO.Amount);
 
             if (!result.success)
                 return BadRequest(new ResultViewModel<string>(result.error!));

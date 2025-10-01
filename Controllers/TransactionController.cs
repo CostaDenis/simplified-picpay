@@ -4,31 +4,37 @@ using simplified_picpay.DTOs.Transaction;
 using simplified_picpay.Models;
 using simplified_picpay.Repositories.Abstractions;
 using simplified_picpay.Services.Abstractions;
+using simplified_picpay.Views.ViewModels;
 
 namespace simplified_picpay.Controllers
 {
 
     [ApiController]
     [Authorize(Roles = "user, storekeeper")]
-    [Route("accounts")]
-    public class TransactionController(ITransactionRepository transactionRepository,
+    [Route("transactions")]
+    public class TransactionController(ITransactionService transactionService,
                                         ITokenService tokenService) : ControllerBase
     {
-        private readonly ITransactionRepository _transactionRepository = transactionRepository;
+        private readonly ITransactionService _transactionService = transactionService;
         private readonly ITokenService _tokenService = tokenService;
 
         [HttpPost]
-        public async Task<IActionResult> CreateTransactionAsync([FromBody] CreateTransactionDTO createTransactionDTO)
+        public async Task<IActionResult> CreateTransactionAsync([FromBody] CreateTransactionDTO createTransactionDTO,
+                                                                    CancellationToken cancellationToken)
         {
-            var payerid = _tokenService.GetAccounId(this.HttpContext);
+            var payerId = _tokenService.GetAccounId(this.HttpContext);
             var transaction = new Transaction
             {
-                PayerId = payerid,
+                PayerId = payerId,
                 PayeeId = createTransactionDTO.PayeeId,
                 Value = createTransactionDTO.Value
             };
+            var result = await _transactionService.CreateTransactionAsync(transaction, cancellationToken);
 
-            return Ok();
+            if (!result.success)
+                return BadRequest(new ResultViewModel<string>(result.error!));
+
+            return Ok(new ResultViewModel<Transaction>(result.data!));
         }
     }
 }

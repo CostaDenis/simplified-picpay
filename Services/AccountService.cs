@@ -29,7 +29,7 @@ namespace simplified_picpay.Services
 
             if (!account.IsActive)
             {
-                var enabled = await EnableAccount(account.Id, cancellationToken);
+                var enabled = await EnableAccountAsync(account.Id, cancellationToken);
                 if (!enabled)
                     return (false, "Erro interno ao reativar conta!", null);
 
@@ -209,7 +209,7 @@ namespace simplified_picpay.Services
             return true;
         }
 
-        public async Task<bool> EnableAccount(Guid id, CancellationToken cancellationToken = default)
+        public async Task<bool> EnableAccountAsync(Guid id, CancellationToken cancellationToken = default)
         {
             try
             {

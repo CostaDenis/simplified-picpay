@@ -14,7 +14,7 @@ namespace simplified_picpay.Repositories
             => await _context.Accounts.FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
 
         public async Task<Account?> GetAccountByIdAsync(Guid id, CancellationToken cancellationToken = default)
-            => await _context.Accounts.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            => await _context.Accounts.FirstOrDefaultAsync(x => x.Id == id);
 
         public Task<Account?> SearchAccountByDisplayNameAsync(string displayName, CancellationToken cancellationToken = default)
             => _context.Accounts.AsNoTracking().FirstOrDefaultAsync(x => x.DisplayName == displayName);
@@ -43,22 +43,26 @@ namespace simplified_picpay.Repositories
             return account;
         }
 
-        public async Task DisableAccountAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<Account> DisableAccountAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var account = await GetAccountByIdAsync(id);
             account!.IsActive = false;
 
             _context.Accounts.Update(account);
             await _context.SaveChangesAsync(cancellationToken);
+
+            return account;
         }
 
-        public async Task EnableAccountAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<Account> EnableAccountAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var account = await GetAccountByIdAsync(id);
             account!.IsActive = true;
 
             _context.Accounts.Update(account);
             await _context.SaveChangesAsync(cancellationToken);
+
+            return account;
         }
 
     }

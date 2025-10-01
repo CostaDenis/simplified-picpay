@@ -71,6 +71,16 @@ namespace simplified_picpay.Data.Mappings
                 .HasConversion<string>()
                 .IsRequired(true);
 
+            builder.Property(a => a.Document)
+                .HasColumnName("document")
+                .HasColumnType("varchar")
+                .HasMaxLength(14)
+                .IsRequired(true);
+
+            builder.HasIndex(a => a.Document)
+                .IsUnique(true)
+                .HasDatabaseName("ux_accounts_document");
+
             builder.Property(a => a.IsActive)
                 .HasColumnName("is_active")
                 .HasColumnType("boolean")
