@@ -16,6 +16,9 @@ namespace simplified_picpay.Repositories
         public async Task<Account?> GetAccountByIdAsync(Guid id, CancellationToken cancellationToken = default)
             => await _context.Accounts.FirstOrDefaultAsync(x => x.Id == id);
 
+        public async Task<Account?> GetAccountByPublicIdAsync(string publicId, CancellationToken cancellationToken = default)
+        => await _context.Accounts.FirstOrDefaultAsync(x => x.PublicId == publicId);
+
         public Task<Account?> SearchAccountByDisplayNameAsync(string displayName, CancellationToken cancellationToken = default)
             => _context.Accounts.AsNoTracking().FirstOrDefaultAsync(x => x.DisplayName == displayName);
 
@@ -64,6 +67,5 @@ namespace simplified_picpay.Repositories
 
             return account;
         }
-
     }
 }

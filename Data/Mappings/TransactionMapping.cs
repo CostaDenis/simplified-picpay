@@ -23,11 +23,23 @@ namespace simplified_picpay.Data.Mappings
                 .HasConstraintName("fk_transactions_payer_id")
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Property(t => t.PayerPublicId)
+                .HasColumnName("payer_public_id")
+                .HasColumnType("varchar")
+                .HasMaxLength(36)
+                .IsRequired(true);
+
             builder.HasOne(t => t.Payee)
                 .WithMany(a => a.Receipts)
                 .HasForeignKey(t => t.PayeeId)
                 .HasConstraintName("fk_transactions_payee_id")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(t => t.PayeePublicId)
+                .HasColumnName("payee_public_id")
+                .HasColumnType("varchar")
+                .HasMaxLength(36)
+                .IsRequired(true);
 
             builder.Property(t => t.Value)
                 .HasColumnName("value")

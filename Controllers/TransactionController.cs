@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using simplified_picpay.DTOs.Transaction;
 using simplified_picpay.Models;
-using simplified_picpay.Repositories.Abstractions;
 using simplified_picpay.Services.Abstractions;
 using simplified_picpay.Views.ViewModels;
 
@@ -23,13 +22,8 @@ namespace simplified_picpay.Controllers
                                                                     CancellationToken cancellationToken)
         {
             var payerId = _tokenService.GetAccounId(this.HttpContext);
-            var transaction = new Transaction
-            {
-                PayerId = payerId,
-                PayeeId = createTransactionDTO.PayeeId,
-                Value = createTransactionDTO.Value
-            };
-            var result = await _transactionService.CreateTransactionAsync(transaction, cancellationToken);
+            createTransactionDTO.PayerId = payerId;
+            var result = await _transactionService.CreateTransactionAsync(createTransactionDTO, cancellationToken);
 
             if (!result.success)
                 return BadRequest(new ResultViewModel<string>(result.error!));
