@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore.Storage;
+using simplified_picpay.Data;
 using simplified_picpay.DTOs.Transaction;
 using simplified_picpay.Enums;
 using simplified_picpay.Models;
@@ -10,13 +12,15 @@ namespace simplified_picpay.Services
                                         IAccountService accountService,
                                         IAuthorizerService authorizerService,
                                         INotifyService notifyService,
-                                        IAccountRepository accountRepository) : ITransactionService
+                                        IAccountRepository accountRepository,
+                                        AppDbContext appDbContext) : ITransactionService
     {
         private readonly ITransactionRepository _transactionRepository = transactionRepository;
         private readonly IAccountService _accountService = accountService;
         private readonly IAuthorizerService _authorizerService = authorizerService;
         private readonly INotifyService _notifyService = notifyService;
         private readonly IAccountRepository _accountRepository = accountRepository;
+        private readonly AppDbContext _appDbContext = appDbContext;
 
         public async Task<(bool success, string? error, Transaction? data)> CreateTransactionAsync(CreateTransactionDTO createTransactionDTO, CancellationToken cancellationToken)
         {
@@ -35,24 +39,29 @@ namespace simplified_picpay.Services
             if (payer!.AccountType == EAccountType.Storekeeper.ToString().ToLower())
                 return (false, "Lojistas não são permitidos a fazer transferências, apenas podem receber!", null);
 
-            if (!_accountService.AddFounds(payee, createTransactionDTO.Value).success)
-                return (false, "Erro ao adicionar fundos!", null);
-
-            if (!_accountService.RemoveFounds(payer, -createTransactionDTO.Value).success)
-                return (false, "Erro ao remover fundos!", null);
-
-            var transaction = new Transaction
-            {
-                PayerId = createTransactionDTO.PayerId,
-                PayerPublicId = createTransactionDTO.PayerPublicId,
-                PayeeId = payee.Id,
-                PayeePublicId = createTransactionDTO.PayeePublicId,
-                Value = createTransactionDTO.Value
-            };
+            using var transactionDatabase = await _appDbContext.Database.BeginTransactionAsync(cancellationToken);
 
             try
             {
+
+                if (!_accountService.AddFounds(payee, createTransactionDTO.Value).success)
+                    return (false, "Erro ao adicionar fundos!", null);
+
+                if (!_accountService.RemoveFounds(payer, -createTransactionDTO.Value).success)
+                    return (false, "Erro ao remover fundos!", null);
+
+                var transaction = new Transaction
+                {
+                    PayerId = createTransactionDTO.PayerId,
+                    PayerPublicId = createTransactionDTO.PayerPublicId,
+                    PayeeId = payee.Id,
+                    PayeePublicId = createTransactionDTO.PayeePublicId,
+                    Value = createTransactionDTO.Value
+                };
+
                 await _transactionRepository.CreateTransactionAsync(transaction, cancellationToken);
+                await _appDbContext.SaveChangesAsync(cancellationToken);
+                await transactionDatabase.CommitAsync(cancellationToken);
 
                 var notify = await _notifyService.SendNotificationAsync(
                     email: payee.Email,
@@ -67,6 +76,12 @@ namespace simplified_picpay.Services
             }
             catch
             {
+
+                if (transactionDatabase.GetDbTransaction().Connection != null)
+                {
+                    await transactionDatabase.RollbackAsync(cancellationToken);
+                }
+
                 return (false, "Erro interno ao fazer a transação", null);
             }
         }
