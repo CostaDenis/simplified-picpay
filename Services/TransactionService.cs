@@ -8,14 +8,19 @@ namespace simplified_picpay.Services
 {
     public class TransactionService(ITransactionRepository transactionRepository,
                                         IAccountService accountService,
+                                        IAuthorizerService authorizerService,
                                         IAccountRepository accountRepository) : ITransactionService
     {
         private readonly ITransactionRepository _transactionRepository = transactionRepository;
         private readonly IAccountService _accountService = accountService;
+        private readonly IAuthorizerService _authorizerService = authorizerService;
         private readonly IAccountRepository _accountRepository = accountRepository;
 
         public async Task<(bool success, string? error, Transaction? data)> CreateTransactionAsync(CreateTransactionDTO createTransactionDTO, CancellationToken cancellationToken)
         {
+            if (!await _authorizerService.IsAuthorizedAsync(cancellationToken))
+                return (false, "Transação não autorizada pelo serviço externo!", null);
+
             var payer = await _accountRepository.GetAccountByIdAsync(createTransactionDTO.PayerId, cancellationToken);
             var payee = await _accountRepository.GetAccountByPublicIdAsync(createTransactionDTO.PayeePublicId, cancellationToken);
 
@@ -25,8 +30,8 @@ namespace simplified_picpay.Services
             if (payee == null)
                 return (false, "Conta recebinte não encontrada!", null);
 
-            if (payer!.AccountType == EAccountType.Storekeeper.ToString())
-                return (false, "Lojistas não são permitidos fazerem transferências, apenas podem receber!", null);
+            if (payer!.AccountType == EAccountType.Storekeeper.ToString().ToLower())
+                return (false, "Lojistas não são permitidos a fazer transferências, apenas podem receber!", null);
 
             if (!_accountService.AddFounds(payee, createTransactionDTO.Value).success)
                 return (false, "Erro ao adicionar fundos!", null);
