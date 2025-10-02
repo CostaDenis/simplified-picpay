@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace simplified_picpay.Models
+namespace simplified_picpay.Dtos.Authorizer
 {
-    public class AuthorizeData
+    public class AuthorizeDataDTO
     {
         public bool Authorization { get; set; }
     }

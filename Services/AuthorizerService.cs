@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using simplified_picpay.Models;
+using simplified_picpay.Dtos.Authorizer;
 using simplified_picpay.Services.Abstractions;
 
 namespace simplified_picpay.Services
@@ -18,7 +14,7 @@ namespace simplified_picpay.Services
             if (!response.IsSuccessStatusCode)
                 return false;
 
-            var content = await response.Content.ReadFromJsonAsync<AutorizeResponse>(cancellationToken);
+            var content = await response.Content.ReadFromJsonAsync<AutorizeResponseDTO>(cancellationToken);
 
             return content is not null &&
                 content.Status.Equals("success", StringComparison.OrdinalIgnoreCase) &&

@@ -9,11 +9,13 @@ namespace simplified_picpay.Services
     public class TransactionService(ITransactionRepository transactionRepository,
                                         IAccountService accountService,
                                         IAuthorizerService authorizerService,
+                                        INotifyService notifyService,
                                         IAccountRepository accountRepository) : ITransactionService
     {
         private readonly ITransactionRepository _transactionRepository = transactionRepository;
         private readonly IAccountService _accountService = accountService;
         private readonly IAuthorizerService _authorizerService = authorizerService;
+        private readonly INotifyService _notifyService = notifyService;
         private readonly IAccountRepository _accountRepository = accountRepository;
 
         public async Task<(bool success, string? error, Transaction? data)> CreateTransactionAsync(CreateTransactionDTO createTransactionDTO, CancellationToken cancellationToken)
@@ -51,6 +53,16 @@ namespace simplified_picpay.Services
             try
             {
                 await _transactionRepository.CreateTransactionAsync(transaction, cancellationToken);
+
+                var notify = await _notifyService.SendNotificationAsync(
+                    email: payee.Email,
+                    message: $"Você recebeu {transaction.Value} de {payer.DisplayName}!",
+                    cancellationToken
+                );
+
+                if (!notify)
+                    Console.Write($"Falha ao enviar email de confirmação para {payee.Email}!");
+
                 return (true, null, transaction);
             }
             catch

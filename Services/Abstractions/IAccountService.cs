@@ -1,4 +1,4 @@
-using simplified_picpay.DTOs;
+using simplified_picpay.DTOs.Account;
 using simplified_picpay.Models;
 using simplified_picpay.Views.ViewModels;
 

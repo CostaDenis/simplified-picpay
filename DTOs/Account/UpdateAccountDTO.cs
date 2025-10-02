@@ -1,6 +1,6 @@
 
 
-namespace simplified_picpay.DTOs
+namespace simplified_picpay.DTOs.Account
 {
     public class UpdateAccountDTO
     {

@@ -1,4 +1,3 @@
-using simplified_picpay.Enums;
 
 namespace simplified_picpay.Models
 {

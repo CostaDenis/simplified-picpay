@@ -1,6 +1,6 @@
 using simplified_picpay.Enums;
 
-namespace simplified_picpay.DTOs
+namespace simplified_picpay.DTOs.Account
 {
     public class CreateAccountDTO
     {

@@ -44,6 +44,7 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddHttpClient<IAuthorizerService, AuthorizerService>();
+builder.Services.AddHttpClient<INotifyService, NotifyService>();
 
 var app = builder.Build();
 
