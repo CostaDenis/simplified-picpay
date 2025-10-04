@@ -10,8 +10,8 @@ namespace simplified_picpay.Services.Abstractions
         public Task<(bool success, string? error, AccountSummaryViewModel? data)> SearchAccountByDisplayNameAsync(SearchDisplayNameDTO searchDisplayNameDTO, CancellationToken cancellationToken = default);
         public Task<(bool success, string? error, Account? data)> CreateAsync(Account account, CancellationToken cancellationToken = default);
         public (bool success, string? error, Account? data) Update(Account account);
-        public (bool success, string? error, Account? data) AddFounds(Account account, decimal amount);
-        public (bool success, string? error, Account? data) RemoveFounds(Account account, decimal amount);
+        public Task<(bool success, string? error, Account? data)> AddFounds(Guid id, decimal amount, CancellationToken cancellationToken = default);
+        public Task<(bool success, string? error, Account? data)> RemoveFounds(Guid id, decimal amount, CancellationToken cancellationToken = default);
         public Task<(bool success, string? error, string? data)> DisableAccountAsync(Guid id, CancellationToken cancellationToken = default);
         public bool VerifyDocument(Account account);
         public bool VerifyAccountType(Account account);

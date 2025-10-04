@@ -28,6 +28,7 @@ namespace simplified_picpay.Services
                 return (false, "Transação não autorizada pelo serviço externo!", null);
 
             var payer = await _accountRepository.GetAccountByIdAsync(createTransactionDTO.PayerId, cancellationToken);
+            var payerPublicId = await _accountRepository.GetPublicIdAsync(payer!.Id);
             var payee = await _accountRepository.GetAccountByPublicIdAsync(createTransactionDTO.PayeePublicId, cancellationToken);
 
             if (payer == payee)
@@ -43,17 +44,19 @@ namespace simplified_picpay.Services
 
             try
             {
+                var addResult = await _accountService.AddFounds(payee.Id, createTransactionDTO.Value, cancellationToken);
+                var removeResult = await _accountService.RemoveFounds(payer.Id, -createTransactionDTO.Value, cancellationToken);
 
-                if (!_accountService.AddFounds(payee, createTransactionDTO.Value).success)
+                if (!addResult.success)
                     return (false, "Erro ao adicionar fundos!", null);
 
-                if (!_accountService.RemoveFounds(payer, -createTransactionDTO.Value).success)
+                if (!removeResult.success)
                     return (false, "Erro ao remover fundos!", null);
 
                 var transaction = new Transaction
                 {
                     PayerId = createTransactionDTO.PayerId,
-                    PayerPublicId = createTransactionDTO.PayerPublicId,
+                    PayerPublicId = payerPublicId,
                     PayeeId = payee.Id,
                     PayeePublicId = createTransactionDTO.PayeePublicId,
                     Value = createTransactionDTO.Value

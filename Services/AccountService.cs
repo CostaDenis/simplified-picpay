@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using simplified_picpay.DTOs.Account;
@@ -116,8 +117,10 @@ namespace simplified_picpay.Services
             }
         }
 
-        public (bool success, string? error, Account? data) AddFounds(Account account, decimal amount)
+        public async Task<(bool success, string? error, Account? data)> AddFounds(Guid id, decimal amount, CancellationToken cancellationToken = default)
         {
+            var account = await _accountRepository.GetAccountByIdAsync(id, cancellationToken);
+
             if (amount <= 0 || amount > decimal.MaxValue)
                 return (false, "A quantia a ser adicionada deve estar entre 1 e 79228162514264337593543950335!", null);
 
@@ -134,8 +137,10 @@ namespace simplified_picpay.Services
             }
         }
 
-        public (bool success, string? error, Account? data) RemoveFounds(Account account, decimal amount)
+        public async Task<(bool success, string? error, Account? data)> RemoveFounds(Guid id, decimal amount, CancellationToken cancellationToken = default)
         {
+            var account = await _accountRepository.GetAccountByIdAsync(id, cancellationToken);
+
             if (amount >= 0 || amount < decimal.MinValue)
                 return (false, "A quantia a ser removida deve estar entre -1 e -79228162514264337593543950335!", null);
 
@@ -221,7 +226,5 @@ namespace simplified_picpay.Services
             }
             return true;
         }
-
-
     }
 }

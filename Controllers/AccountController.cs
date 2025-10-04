@@ -11,10 +11,8 @@ namespace simplified_picpay.Controllers
     [ApiController]
     [Authorize(Roles = "user, storekeeper")]
     [Route("accounts")]
-    public class AccountController(IAccountRepository accountRepository,
-    IAccountService AccountService, ITokenService tokenService) : ControllerBase
+    public class AccountController(IAccountService AccountService, ITokenService tokenService) : ControllerBase
     {
-        private readonly IAccountRepository _AccountRepository = accountRepository;
         private readonly IAccountService _accountService = AccountService;
         private readonly ITokenService _tokenService = tokenService;
 
@@ -97,8 +95,7 @@ namespace simplified_picpay.Controllers
                                                         CancellationToken cancellationToken)
         {
             var id = _tokenService.GetAccounId(this.HttpContext);
-            var account = await _AccountRepository.GetAccountByIdAsync(id, cancellationToken);
-            var result = _accountService.AddFounds(account!, updateFoundsDTO.Amount);
+            var result = await _accountService.AddFounds(id, updateFoundsDTO.Amount, cancellationToken);
 
             if (!result.success)
                 return BadRequest(new ResultViewModel<string>(result.error!));
@@ -112,8 +109,7 @@ namespace simplified_picpay.Controllers
                                                         CancellationToken cancellationToken)
         {
             var id = _tokenService.GetAccounId(this.HttpContext);
-            var account = await _AccountRepository.GetAccountByIdAsync(id, cancellationToken);
-            var result = _accountService.RemoveFounds(account!, updateFoundsDTO.Amount);
+            var result = await _accountService.RemoveFounds(id, updateFoundsDTO.Amount, cancellationToken);
 
             if (!result.success)
                 return BadRequest(new ResultViewModel<string>(result.error!));

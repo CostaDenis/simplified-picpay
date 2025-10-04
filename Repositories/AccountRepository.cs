@@ -19,6 +19,13 @@ namespace simplified_picpay.Repositories
         public async Task<Account?> GetAccountByPublicIdAsync(string publicId, CancellationToken cancellationToken = default)
         => await _context.Accounts.FirstOrDefaultAsync(x => x.PublicId == publicId);
 
+        public async Task<string> GetPublicIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var account = await GetAccountByIdAsync(id);
+
+            return account!.PublicId;
+        }
+
         public Task<Account?> SearchAccountByDisplayNameAsync(string displayName, CancellationToken cancellationToken = default)
             => _context.Accounts.AsNoTracking().FirstOrDefaultAsync(x => x.DisplayName == displayName);
 
