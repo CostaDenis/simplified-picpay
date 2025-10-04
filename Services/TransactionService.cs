@@ -22,7 +22,7 @@ namespace simplified_picpay.Services
         private readonly IAccountRepository _accountRepository = accountRepository;
         private readonly AppDbContext _appDbContext = appDbContext;
 
-        public async Task<(bool success, string? error, Transaction? data)> CreateTransactionAsync(CreateTransactionDTO createTransactionDTO, CancellationToken cancellationToken)
+        public async Task<(bool success, string? error, Transaction? data)> CreateTransactionAsync(CreateTransactionDTO createTransactionDTO, CancellationToken cancellationToken = default)
         {
             if (!await _authorizerService.IsAuthorizedAsync(cancellationToken))
                 return (false, "Transação não autorizada pelo serviço externo!", null);
@@ -83,6 +83,57 @@ namespace simplified_picpay.Services
                 }
 
                 return (false, "Erro interno ao fazer a transação", null);
+            }
+        }
+
+        public async Task<(bool success, string? error, List<Transaction>? data)> AllYourTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var transactions = await _transactionRepository.AllYourTransactionsAsync(id, cancellationToken);
+
+                if (transactions == null)
+                    return (true, null, data: transactions);
+
+                return (true, null, transactions);
+            }
+            catch
+            {
+                return (false, "Erro interno ao consultar as transações de sua conta!", null);
+            }
+        }
+
+        public async Task<(bool success, string? error, List<Transaction>? data)> AllYourTransactionsReceivedAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var transactions = await _transactionRepository.AllYourTransactionsReceivedAsync(id, cancellationToken);
+
+                if (transactions == null)
+                    return (true, null, data: transactions);
+
+                return (true, null, transactions);
+            }
+            catch
+            {
+                return (false, "Erro interno ao consultar as transações recebidas de sua conta!", null);
+            }
+        }
+
+        public async Task<(bool success, string? error, List<Transaction>? data)> AllYourTransactionsPaiedAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var transactions = await _transactionRepository.AllYourTransactionsPaiedAsync(id, cancellationToken);
+
+                if (transactions == null)
+                    return (true, null, data: transactions);
+
+                return (true, null, transactions);
+            }
+            catch
+            {
+                return (false, "Erro interno ao consultar as transações feitas de sua conta!", null);
             }
         }
     }

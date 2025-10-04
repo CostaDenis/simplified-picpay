@@ -30,5 +30,52 @@ namespace simplified_picpay.Controllers
 
             return Ok(new ResultViewModel<Transaction>(result.data!));
         }
+
+        [HttpGet]
+        public async Task<IActionResult> AllYourTransactionsAsync(CancellationToken cancellationToken)
+        {
+            var id = _tokenService.GetAccounId(this.HttpContext);
+            var result = await _transactionService.AllYourTransactionsAsync(id, cancellationToken);
+
+            if (!result.success)
+                return BadRequest(new ResultViewModel<string>(result.error!));
+
+            if (result.data!.Count == 0)
+                return Ok(new ResultViewModel<string>(data: "Nenhuma transação encontrada!"));
+
+            return Ok(new ResultViewModel<List<Transaction>>(result.data!));
+        }
+
+        [HttpGet]
+        [Route("received")]
+        public async Task<IActionResult> AllYourTransactionsReceivedAsync(CancellationToken cancellationToken)
+        {
+            var id = _tokenService.GetAccounId(this.HttpContext);
+            var result = await _transactionService.AllYourTransactionsReceivedAsync(id, cancellationToken);
+
+            if (!result.success)
+                return BadRequest(new ResultViewModel<string>(result.error!));
+
+            if (result.data!.Count == 0)
+                return Ok(new ResultViewModel<string>(data: "Nenhuma transação encontrada!"));
+
+            return Ok(new ResultViewModel<List<Transaction>>(result.data!));
+        }
+
+        [HttpGet]
+        [Route("paied")]
+        public async Task<IActionResult> AllYourTransactionsPaiedAsync(CancellationToken cancellationToken)
+        {
+            var id = _tokenService.GetAccounId(this.HttpContext);
+            var result = await _transactionService.AllYourTransactionsPaiedAsync(id, cancellationToken);
+
+            if (!result.success)
+                return BadRequest(new ResultViewModel<string>(result.error!));
+
+            if (result.data!.Count == 0)
+                return Ok(new ResultViewModel<string>(data: "Nenhuma transação encontrada!"));
+
+            return Ok(new ResultViewModel<List<Transaction>>(result.data!));
+        }
     }
 }
