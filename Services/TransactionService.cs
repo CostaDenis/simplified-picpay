@@ -40,18 +40,23 @@ namespace simplified_picpay.Services
             if (payer!.AccountType == EAccountType.Storekeeper.ToString().ToLower())
                 return (false, "Lojistas não são permitidos a fazer transferências, apenas podem receber!", null);
 
-            using var transactionDatabase = await _appDbContext.Database.BeginTransactionAsync(cancellationToken);
+            await using var transactionDatabase = await _appDbContext.Database.BeginTransactionAsync(cancellationToken);
 
             try
             {
-                var addResult = await _accountService.AddFounds(payee.Id, createTransactionDTO.Value, cancellationToken);
-                var removeResult = await _accountService.RemoveFounds(payer.Id, -createTransactionDTO.Value, cancellationToken);
+                var value = createTransactionDTO.Value;
 
-                if (!addResult.success)
-                    return (false, "Erro ao adicionar fundos!", null);
+                if (value <= 0)
+                    return (false, "Valor inválido para transferência.", null);
 
-                if (!removeResult.success)
-                    return (false, "Erro ao remover fundos!", null);
+                if (payer.CurrentBalance < value)
+                    return (false, "Saldo insuficiente.", null);
+
+                payer.CurrentBalance -= value;
+                payee.CurrentBalance += value;
+
+                _appDbContext.Accounts.Update(payee);
+                _appDbContext.Accounts.Update(payer);
 
                 var transaction = new Transaction
                 {
@@ -66,34 +71,48 @@ namespace simplified_picpay.Services
                 await _appDbContext.SaveChangesAsync(cancellationToken);
                 await transactionDatabase.CommitAsync(cancellationToken);
 
-                var notify = await _notifyService.SendNotificationAsync(
+                _ = _notifyService.SendNotificationAsync(
                     email: payee.Email,
-                    message: $"Você recebeu {transaction.Value} de {payer.DisplayName}!",
+                    message: $"Você recebeu {value} de {payer.DisplayName}!",
                     cancellationToken
-                );
-
-                if (!notify)
-                    Console.Write($"Falha ao enviar email de confirmação para {payee.Email}!");
+                    );
 
                 return (true, null, transaction);
             }
             catch
             {
-
                 if (transactionDatabase.GetDbTransaction().Connection != null)
-                {
                     await transactionDatabase.RollbackAsync(cancellationToken);
-                }
 
                 return (false, "Erro interno ao fazer a transação", null);
             }
         }
 
-        public async Task<(bool success, string? error, List<Transaction>? data)> AllYourTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool success, string? error, Transaction? data)> GetTransactionByIdAsync(Guid transactionId, Guid accountId, CancellationToken cancellationToken = default)
         {
             try
             {
-                var transactions = await _transactionRepository.AllYourTransactionsAsync(id, cancellationToken);
+                var transaction = await _transactionRepository.GetTransactionAsync(transactionId, cancellationToken);
+
+                if (transaction == null)
+                    return (false, "Transação não encontrada!", null);
+
+                if (transaction.PayerId != accountId && transaction.PayeeId != accountId)
+                    return (false, "Não é possível consultar transações de terceiros!", null);
+
+                return (true, null, transaction);
+            }
+            catch
+            {
+                return (false, "Erro interno ao consultar a transação!", null);
+            }
+        }
+
+        public async Task<(bool success, string? error, List<Transaction>? data)> GetAllYourTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var transactions = await _transactionRepository.GetAllYourTransactionsAsync(id, cancellationToken);
 
                 if (transactions == null)
                     return (true, null, data: transactions);
@@ -106,11 +125,11 @@ namespace simplified_picpay.Services
             }
         }
 
-        public async Task<(bool success, string? error, List<Transaction>? data)> AllYourTransactionsReceivedAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool success, string? error, List<Transaction>? data)> GetAllReceivedTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
         {
             try
             {
-                var transactions = await _transactionRepository.AllYourTransactionsReceivedAsync(id, cancellationToken);
+                var transactions = await _transactionRepository.GetAllReceivedTransactionsAsync(id, cancellationToken);
 
                 if (transactions == null)
                     return (true, null, data: transactions);
@@ -123,11 +142,11 @@ namespace simplified_picpay.Services
             }
         }
 
-        public async Task<(bool success, string? error, List<Transaction>? data)> AllYourTransactionsPaiedAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool success, string? error, List<Transaction>? data)> GetAllPaidTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
         {
             try
             {
-                var transactions = await _transactionRepository.AllYourTransactionsPaiedAsync(id, cancellationToken);
+                var transactions = await _transactionRepository.GetAllPaidTransactionsAsync(id, cancellationToken);
 
                 if (transactions == null)
                     return (true, null, data: transactions);
@@ -139,5 +158,6 @@ namespace simplified_picpay.Services
                 return (false, "Erro interno ao consultar as transações feitas de sua conta!", null);
             }
         }
+
     }
 }

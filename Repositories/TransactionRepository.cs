@@ -16,13 +16,17 @@ namespace simplified_picpay.Repositories
             return transaction;
         }
 
-        public async Task<List<Transaction>?> AllYourTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<Transaction?> GetTransactionAsync(Guid id, CancellationToken cancellationToken = default)
+            => await _context.Transactions.FirstOrDefaultAsync(x => x.Id == id);
+
+        public async Task<List<Transaction>?> GetAllYourTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
             => await _context.Transactions.Where(x => x.PayeeId == id || x.PayerId == id).AsNoTracking().ToListAsync(cancellationToken);
 
-        public async Task<List<Transaction>?> AllYourTransactionsReceivedAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<List<Transaction>?> GetAllReceivedTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
             => await _context.Transactions.Where(x => x.PayeeId == id).AsNoTracking().ToListAsync(cancellationToken);
 
-        public async Task<List<Transaction>?> AllYourTransactionsPaiedAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<List<Transaction>?> GetAllPaidTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
             => await _context.Transactions.Where(x => x.PayerId == id).AsNoTracking().ToListAsync(cancellationToken);
+
     }
 }

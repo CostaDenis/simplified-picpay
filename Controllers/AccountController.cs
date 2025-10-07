@@ -66,7 +66,16 @@ namespace simplified_picpay.Controllers
             if (!result.success)
                 return BadRequest(new ResultViewModel<string>(result.error!));
 
-            return Ok(new ResultViewModel<Account>(result.data!));
+            return Ok(new ResultViewModel<AccountViewModel>(new AccountViewModel
+            {
+                Id = result.data!.Id,
+                FullName = result.data!.FullName,
+                DisplayName = result.data!.DisplayName,
+                PublicId = result.data!.PublicId,
+                Email = result.data!.Email,
+                AccountType = result.data!.AccountType,
+                Document = result.data!.Document
+            }));
         }
 
         [HttpPut]
@@ -86,7 +95,16 @@ namespace simplified_picpay.Controllers
             if (!result.success)
                 return BadRequest(new ResultViewModel<string>(result.error!));
 
-            return Ok(new ResultViewModel<Account>(result.data!));
+            return Ok(new ResultViewModel<AccountViewModel>(new AccountViewModel
+            {
+                Id = result.data!.Id,
+                FullName = result.data!.FullName,
+                DisplayName = result.data!.DisplayName,
+                PublicId = result.data!.PublicId,
+                Email = result.data!.Email,
+                AccountType = result.data!.AccountType,
+                Document = result.data!.Document
+            }));
         }
 
         [HttpPut]
@@ -100,7 +118,12 @@ namespace simplified_picpay.Controllers
             if (!result.success)
                 return BadRequest(new ResultViewModel<string>(result.error!));
 
-            return Ok(new ResultViewModel<Account>(result.data!));
+            return Ok(new ResultViewModel<NewAccountBalanceViewModel>(new NewAccountBalanceViewModel
+            {
+                Id = result.data!.Id,
+                PublicId = result.data!.PublicId,
+                Balance = result.data!.CurrentBalance
+            }));
         }
 
         [HttpPut]
@@ -114,7 +137,12 @@ namespace simplified_picpay.Controllers
             if (!result.success)
                 return BadRequest(new ResultViewModel<string>(result.error!));
 
-            return Ok(new ResultViewModel<Account>(result.data!));
+            return Ok(new ResultViewModel<NewAccountBalanceViewModel>(new NewAccountBalanceViewModel
+            {
+                Id = result.data!.Id,
+                PublicId = result.data!.PublicId,
+                Balance = result.data!.CurrentBalance
+            }));
         }
 
         [HttpPut]
@@ -127,7 +155,7 @@ namespace simplified_picpay.Controllers
             if (!result.success)
                 return BadRequest(new ResultViewModel<string>(result.error!));
 
-            return Ok(new ResultViewModel<Account>(result.data!));
+            return Ok(new ResultViewModel<string>(data: result.data!));
         }
     }
 }

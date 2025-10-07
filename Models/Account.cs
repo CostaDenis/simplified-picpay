@@ -16,6 +16,5 @@ namespace simplified_picpay.Models
         public List<Transaction> Receipts { get; set; } = new();
         public bool IsActive { get; set; } = true;
 
-
     }
 }
