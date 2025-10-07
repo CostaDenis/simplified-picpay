@@ -60,7 +60,8 @@ namespace simplified_picpay.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetAllYourTransactionsAsync(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllYourTransactionsAsync([FromBody] PaginationTransactionDTO paginationTransactionDTO,
+                                                                        CancellationToken cancellationToken)
         {
             var id = _tokenService.GetAccounId(this.HttpContext);
             var result = await _transactionService.GetAllYourTransactionsAsync(id, cancellationToken);

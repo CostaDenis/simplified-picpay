@@ -22,7 +22,8 @@ namespace simplified_picpay.Services
         private readonly IAccountRepository _accountRepository = accountRepository;
         private readonly AppDbContext _appDbContext = appDbContext;
 
-        public async Task<(bool success, string? error, Transaction? data)> CreateTransactionAsync(CreateTransactionDTO createTransactionDTO, CancellationToken cancellationToken = default)
+        public async Task<(bool success, string? error, Transaction? data)> CreateTransactionAsync
+            (CreateTransactionDTO createTransactionDTO, CancellationToken cancellationToken = default)
         {
             if (!await _authorizerService.IsAuthorizedAsync(cancellationToken))
                 return (false, "Transação não autorizada pelo serviço externo!", null);
@@ -88,7 +89,8 @@ namespace simplified_picpay.Services
             }
         }
 
-        public async Task<(bool success, string? error, Transaction? data)> GetTransactionByIdAsync(Guid transactionId, Guid accountId, CancellationToken cancellationToken = default)
+        public async Task<(bool success, string? error, Transaction? data)> GetTransactionByIdAsync
+            (Guid transactionId, Guid accountId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -108,11 +110,14 @@ namespace simplified_picpay.Services
             }
         }
 
-        public async Task<(bool success, string? error, List<Transaction>? data)> GetAllYourTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool success, string? error, List<Transaction>? data)> GetAllYourTransactionsAsync
+            (Guid id, PaginationTransactionDTO paginationTransactionDTO, CancellationToken cancellationToken = default)
         {
             try
             {
-                var transactions = await _transactionRepository.GetAllYourTransactionsAsync(id, cancellationToken);
+                var transactions = await _transactionRepository.GetAllYourTransactionsAsync
+                    (id, paginationTransactionDTO.Skip, paginationTransactionDTO.Take, cancellationToken);
+
 
                 if (transactions == null)
                     return (true, null, data: transactions);
@@ -125,11 +130,14 @@ namespace simplified_picpay.Services
             }
         }
 
-        public async Task<(bool success, string? error, List<Transaction>? data)> GetAllReceivedTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool success, string? error, List<Transaction>? data)> GetAllReceivedTransactionsAsync
+            (Guid id, PaginationTransactionDTO paginationTransactionDTO, CancellationToken cancellationToken = default)
         {
             try
             {
-                var transactions = await _transactionRepository.GetAllReceivedTransactionsAsync(id, cancellationToken);
+                var transactions = await _transactionRepository.GetAllReceivedTransactionsAsync
+                    (id, paginationTransactionDTO.Skip, paginationTransactionDTO.Take, cancellationToken);
+
 
                 if (transactions == null)
                     return (true, null, data: transactions);
@@ -142,11 +150,13 @@ namespace simplified_picpay.Services
             }
         }
 
-        public async Task<(bool success, string? error, List<Transaction>? data)> GetAllPaidTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool success, string? error, List<Transaction>? data)> GetAllPaidTransactionsAsync
+            (Guid id, PaginationTransactionDTO paginationTransactionDTO, CancellationToken cancellationToken = default)
         {
             try
             {
-                var transactions = await _transactionRepository.GetAllPaidTransactionsAsync(id, cancellationToken);
+                var transactions = await _transactionRepository.GetAllPaidTransactionsAsync
+                    (id, paginationTransactionDTO.Skip, paginationTransactionDTO.Take, cancellationToken);
 
                 if (transactions == null)
                     return (true, null, data: transactions);

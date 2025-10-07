@@ -19,14 +19,14 @@ namespace simplified_picpay.Repositories
         public async Task<Transaction?> GetTransactionAsync(Guid id, CancellationToken cancellationToken = default)
             => await _context.Transactions.FirstOrDefaultAsync(x => x.Id == id);
 
-        public async Task<List<Transaction>?> GetAllYourTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
-            => await _context.Transactions.Where(x => x.PayeeId == id || x.PayerId == id).AsNoTracking().ToListAsync(cancellationToken);
+        public async Task<List<Transaction>?> GetAllYourTransactionsAsync(Guid id, int skip, int take, CancellationToken cancellationToken = default)
+            => await _context.Transactions.Where(x => x.PayeeId == id || x.PayerId == id).Skip(skip).Take(take).AsNoTracking().ToListAsync(cancellationToken);
 
-        public async Task<List<Transaction>?> GetAllReceivedTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
-            => await _context.Transactions.Where(x => x.PayeeId == id).AsNoTracking().ToListAsync(cancellationToken);
+        public async Task<List<Transaction>?> GetAllReceivedTransactionsAsync(Guid id, int skip, int take, CancellationToken cancellationToken = default)
+            => await _context.Transactions.Where(x => x.PayeeId == id).AsNoTracking().Skip(skip).Take(take).ToListAsync(cancellationToken);
 
-        public async Task<List<Transaction>?> GetAllPaidTransactionsAsync(Guid id, CancellationToken cancellationToken = default)
-            => await _context.Transactions.Where(x => x.PayerId == id).AsNoTracking().ToListAsync(cancellationToken);
+        public async Task<List<Transaction>?> GetAllPaidTransactionsAsync(Guid id, int skip, int take, CancellationToken cancellationToken = default)
+            => await _context.Transactions.Where(x => x.PayerId == id).AsNoTracking().Skip(skip).Take(take).ToListAsync(cancellationToken);
 
     }
 }
