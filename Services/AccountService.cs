@@ -81,6 +81,9 @@ namespace simplified_picpay.Services
             if (!VerifyDocument(account))
                 return (false, "Verifique o documento!", null);
 
+            if (!account.Email.Contains("@"))
+                return (false, "Verifique o email!", null);
+
             var passwordHash = PasswordHasher(account, account.PasswordHash);
             account.PasswordHash = passwordHash;
 
@@ -98,10 +101,16 @@ namespace simplified_picpay.Services
             }
         }
 
-        public (bool success, string? error, Account? data) Update(Account account)
+        public async Task<(bool success, string? error, Account? data)> Update(UpdateAccountDTO updateAccountDTO)
         {
-            var passwordHash = PasswordHasher(account, account.PasswordHash);
-            account.PasswordHash = passwordHash;
+            var account = await _accountRepository.GetAccountByIdAsync(updateAccountDTO.Id);
+            var passwordHash = PasswordHasher(account!, updateAccountDTO.Password);
+
+            account!.FullName = updateAccountDTO.FullName;
+            account!.DisplayName = updateAccountDTO.DisplayName;
+            account!.Email = updateAccountDTO.Email;
+            account!.FullName = updateAccountDTO.FullName;
+            account!.PasswordHash = passwordHash;
 
             try
             {

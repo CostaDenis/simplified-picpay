@@ -79,18 +79,12 @@ namespace simplified_picpay.Controllers
         }
 
         [HttpPut]
-        public IActionResult Update([FromBody] UpdateAccountDTO updateAccountDTO)
+        public async Task<IActionResult> Update([FromBody] UpdateAccountDTO updateAccountDTO)
         {
             var id = _tokenService.GetAccounId(this.HttpContext);
-            var account = new Account
-            {
-                Id = id,
-                FullName = updateAccountDTO.FullName,
-                DisplayName = updateAccountDTO.DisplayName,
-                Email = updateAccountDTO.Email,
-                PasswordHash = updateAccountDTO.Password
-            };
-            var result = _accountService.Update(account);
+            updateAccountDTO.Id = id;
+
+            var result = await _accountService.Update(updateAccountDTO);
 
             if (!result.success)
                 return BadRequest(new ResultViewModel<string>(result.error!));
