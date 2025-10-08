@@ -6,13 +6,13 @@ namespace simplified_picpay.Services.Abstractions
 {
     public interface IAccountService
     {
-        public Task<(bool success, string? error, LoggedAccountViewModel? data)> LoginAsync(LoginDTO loginDTO, CancellationToken cancellationToken = default);
-        public Task<(bool success, string? error, AccountSummaryViewModel? data)> SearchAccountByDisplayNameAsync(SearchDisplayNameDTO searchDisplayNameDTO, CancellationToken cancellationToken = default);
-        public Task<(bool success, string? error, Account? data)> CreateAsync(Account account, CancellationToken cancellationToken = default);
-        public Task<(bool success, string? error, Account? data)> Update(UpdateAccountDTO updateAccountDTO);
-        public Task<(bool success, string? error, Account? data)> AddFounds(Guid id, decimal amount, CancellationToken cancellationToken = default);
-        public Task<(bool success, string? error, Account? data)> RemoveFounds(Guid id, decimal amount, CancellationToken cancellationToken = default);
-        public Task<(bool success, string? error, string? data)> DisableAccountAsync(Guid id, CancellationToken cancellationToken = default);
+        public Task<LoggedAccountViewModel> LoginAsync(LoginDTO loginDTO, CancellationToken cancellationToken = default);
+        public Task<AccountSummaryViewModel> SearchAccountByDisplayNameAsync(SearchDisplayNameDTO searchDisplayNameDTO, CancellationToken cancellationToken = default);
+        public Task<Account> CreateAsync(Account account, CancellationToken cancellationToken = default);
+        public Task<Account> Update(UpdateAccountDTO updateAccountDTO);
+        public Task<Account> AddFounds(Guid id, decimal amount, CancellationToken cancellationToken = default);
+        public Task<Account> RemoveFounds(Guid id, decimal amount, CancellationToken cancellationToken = default);
+        public Task<string> DisableAccountAsync(Guid id, CancellationToken cancellationToken = default);
         public bool VerifyDocument(Account account);
         public bool VerifyAccountType(Account account);
         public string PasswordHasher(Account account, string password);

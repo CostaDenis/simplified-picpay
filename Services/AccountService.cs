@@ -1,9 +1,9 @@
 using System.Data.Common;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using simplified_picpay.DTOs.Account;
 using simplified_picpay.Enums;
+using simplified_picpay.Exceptions.AccountExceptions;
 using simplified_picpay.Models;
 using simplified_picpay.Repositories.Abstractions;
 using simplified_picpay.Services.Abstractions;
@@ -18,27 +18,26 @@ namespace simplified_picpay.Services
         private readonly ITokenService _tokenService = tokenService;
 
 
-        public async Task<(bool success, string? error, LoggedAccountViewModel? data)> LoginAsync(LoginDTO loginDTO, CancellationToken cancellationToken = default)
+        public async Task<LoggedAccountViewModel> LoginAsync(LoginDTO loginDTO, CancellationToken cancellationToken = default)
         {
             var account = await _accountRepository.LoginAsync(loginDTO.Email, cancellationToken);
 
             if (account == null)
-                return (false, "Acesso negado!", null);
+                throw new LoginFailedException("Acesso negado!");
 
             if (!CheckPassword(account, account.PasswordHash, loginDTO.Password))
-                return (false, "Acesso negado!", null);
+                throw new LoginFailedException("Acesso negado!");
 
             if (!account.IsActive)
             {
                 var enabled = await EnableAccountAsync(account.Id, cancellationToken);
                 if (!enabled)
-                    return (false, "Erro interno ao reativar conta!", null);
-
+                    throw new AccountReactivationException("Erro ao reativar conta!");
             }
 
             var token = _tokenService.GenerateTokenJwt(account.Id, account.Email, account.AccountType);
 
-            return (true, null, new LoggedAccountViewModel
+            return new LoggedAccountViewModel
             {
                 Id = account.Id,
                 FullName = account.FullName,
@@ -49,59 +48,60 @@ namespace simplified_picpay.Services
                 AccountType = account.AccountType,
                 Document = account.Document,
                 Token = token
-            });
+            };
 
         }
 
-        public async Task<(bool success, string? error, AccountSummaryViewModel? data)> SearchAccountByDisplayNameAsync(SearchDisplayNameDTO searchDisplayNameDTO, CancellationToken cancellationToken = default)
+        public async Task<AccountSummaryViewModel> SearchAccountByDisplayNameAsync(SearchDisplayNameDTO searchDisplayNameDTO, CancellationToken cancellationToken = default)
         {
             var account = await _accountRepository.SearchAccountByDisplayNameAsync(searchDisplayNameDTO.DisplayName, cancellationToken);
             string accountIsActive = "Conta ativa";
 
             if (account == null)
-                return (false, "Conta não encontrada", null);
+                throw new AccountNotFoundException("Conta não encontrada!");
 
             if (!account.IsActive)
                 accountIsActive = "Conta desativada";
 
-            return (true, null, new AccountSummaryViewModel
+            return new AccountSummaryViewModel
             {
                 DisplayName = account.DisplayName,
                 PublicId = account.PublicId,
                 AccountType = account.AccountType,
                 IsActive = accountIsActive
-            });
+            };
         }
 
-        public async Task<(bool success, string? error, Account? data)> CreateAsync(Account account, CancellationToken cancellationToken = default)
+        public async Task<Account> CreateAsync(Account account, CancellationToken cancellationToken = default)
         {
             if (!VerifyAccountType(account))
-                return (false, "Só está disponível conta de User e Storekeeper!", null);
+                throw new InvalidAccountTypeException("Só está disponível conta de User e Storekeeper!");
 
             if (!VerifyDocument(account))
-                return (false, "Verifique o documento!", null);
+                throw new InvalidDocumentException("Documento inválido! Em caso de conta de usuário," +
+                    "o documento (CPF) deve ter 11 dígitos, e se for lojista, o documento (CNPJ) deve ter 14 dígitos!");
 
             if (!account.Email.Contains("@"))
-                return (false, "Verifique o email!", null);
+                throw new InvalidEmailException("Email inválido!");
 
             var passwordHash = PasswordHasher(account, account.PasswordHash);
             account.PasswordHash = passwordHash;
 
             try
             {
-                return (true, null, await _accountRepository.CreateAsync(account, cancellationToken));
+                return await _accountRepository.CreateAsync(account, cancellationToken);
             }
             catch (DbException)
             {
-                return (false, "Email ou DisplayName já registrado. Use outro!", null);
+                throw new DuplicateAccountException("Email ou DisplayName já registrado. Use outro!");
             }
             catch
             {
-                return (false, "Erro interno ao criar a conta", null);
+                throw new DomainException("Erro interno ao criar a conta");
             }
         }
 
-        public async Task<(bool success, string? error, Account? data)> Update(UpdateAccountDTO updateAccountDTO)
+        public async Task<Account> Update(UpdateAccountDTO updateAccountDTO)
         {
             var account = await _accountRepository.GetAccountByIdAsync(updateAccountDTO.Id);
             var passwordHash = PasswordHasher(account!, updateAccountDTO.Password);
@@ -114,72 +114,72 @@ namespace simplified_picpay.Services
 
             try
             {
-                return (true, null, _accountRepository.Update(account));
+                return _accountRepository.Update(account);
             }
             catch (DbUpdateException)
             {
-                return (false, "Email ou DisplayName já registrado. Use outro!", null);
+                throw new DuplicateAccountException("Email ou DisplayName já registrado. Use outro!");
             }
             catch
             {
-                return (false, "Erro interno ao criar a conta", null);
+                throw new DomainException("Erro interno ao atualizar a conta");
             }
         }
 
-        public async Task<(bool success, string? error, Account? data)> AddFounds(Guid id, decimal amount, CancellationToken cancellationToken = default)
+        public async Task<Account> AddFounds(Guid id, decimal amount, CancellationToken cancellationToken = default)
         {
             var account = await _accountRepository.GetAccountByIdAsync(id, cancellationToken);
 
             if (amount <= 0 || amount > decimal.MaxValue)
-                return (false, "A quantia a ser adicionada deve estar entre 1 e 79228162514264337593543950335!", null);
+                throw new InvalidAmountException("A quantia a ser adicionada deve estar entre 1 e 79228162514264337593543950335!");
 
             var newBalance = account!.CurrentBalance + amount;
             account.CurrentBalance = newBalance;
 
             try
             {
-                return (true, null, _accountRepository.UpdateFounds(account));
+                return _accountRepository.UpdateFounds(account);
             }
             catch
             {
-                return (false, "Erro interno ao atualizar saldo!", null);
+                throw new DomainException("Erro interno ao atualizar saldo!");
             }
         }
 
-        public async Task<(bool success, string? error, Account? data)> RemoveFounds(Guid id, decimal amount, CancellationToken cancellationToken = default)
+        public async Task<Account> RemoveFounds(Guid id, decimal amount, CancellationToken cancellationToken = default)
         {
             var account = await _accountRepository.GetAccountByIdAsync(id, cancellationToken);
 
             if (amount >= 0 || amount < decimal.MinValue)
-                return (false, "A quantia a ser removida deve estar entre -1 e -79228162514264337593543950335!", null);
+                throw new InvalidWithdrawalAmountException("A quantia a ser removida deve estar entre -1 e -79228162514264337593543950335!");
 
             var newBalance = account!.CurrentBalance + amount;
 
             if (newBalance < 0)
-                return (false, "Saldo insuficiente", null);
+                throw new InsufficientFundsException("Saldo insuficiente para realizar a transação!");
 
             account!.CurrentBalance = newBalance;
 
             try
             {
-                return (true, null, _accountRepository.UpdateFounds(account));
+                return _accountRepository.UpdateFounds(account);
             }
             catch
             {
-                return (false, "Erro interno ao atualizar saldo!", null);
+                throw new DomainException("Erro interno ao atualizar saldo!");
             }
         }
 
-        public async Task<(bool success, string? error, string? data)> DisableAccountAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<string> DisableAccountAsync(Guid id, CancellationToken cancellationToken = default)
         {
             try
             {
                 await _accountRepository.DisableAccountAsync(id, cancellationToken);
-                return (true, null, "Conta desativada");
+                return "Conta desativada";
             }
             catch
             {
-                return (false, "Erro interno ao desativar a conta", null);
+                throw new DomainException("Erro interno ao desativar a conta");
             }
         }
 

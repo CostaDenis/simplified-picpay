@@ -23,12 +23,7 @@ namespace simplified_picpay.Controllers
                                                     CancellationToken cancellationToken)
         {
             var result = await _accountService.LoginAsync(loginDTO, cancellationToken);
-
-            if (!result.success)
-                return Unauthorized(new ResultViewModel<string>(result.error!));
-
-            return Ok(new ResultViewModel<LoggedAccountViewModel>(result.data!));
-
+            return Ok(new ResultViewModel<LoggedAccountViewModel>(result));
         }
 
         [HttpPost]
@@ -37,12 +32,7 @@ namespace simplified_picpay.Controllers
                                                                             CancellationToken cancellationToken)
         {
             var result = await _accountService.SearchAccountByDisplayNameAsync(searchDisplayNameDTO, cancellationToken);
-
-            if (!result.success)
-                return NotFound(new ResultViewModel<string>(result.error!));
-
-            return Ok(new ResultViewModel<AccountSummaryViewModel>(result.data!));
-
+            return Ok(new ResultViewModel<AccountSummaryViewModel>(result));
         }
 
         [HttpPost]
@@ -63,18 +53,15 @@ namespace simplified_picpay.Controllers
 
             var result = await _accountService.CreateAsync(account, cancellationToken);
 
-            if (!result.success)
-                return BadRequest(new ResultViewModel<string>(result.error!));
-
             return Ok(new ResultViewModel<AccountViewModel>(new AccountViewModel
             {
-                Id = result.data!.Id,
-                FullName = result.data!.FullName,
-                DisplayName = result.data!.DisplayName,
-                PublicId = result.data!.PublicId,
-                Email = result.data!.Email,
-                AccountType = result.data!.AccountType,
-                Document = result.data!.Document
+                Id = result.Id,
+                FullName = result.FullName,
+                DisplayName = result.DisplayName,
+                PublicId = result.PublicId,
+                Email = result.Email,
+                AccountType = result.AccountType,
+                Document = result.Document
             }));
         }
 
@@ -86,18 +73,15 @@ namespace simplified_picpay.Controllers
 
             var result = await _accountService.Update(updateAccountDTO);
 
-            if (!result.success)
-                return BadRequest(new ResultViewModel<string>(result.error!));
-
             return Ok(new ResultViewModel<AccountViewModel>(new AccountViewModel
             {
-                Id = result.data!.Id,
-                FullName = result.data!.FullName,
-                DisplayName = result.data!.DisplayName,
-                PublicId = result.data!.PublicId,
-                Email = result.data!.Email,
-                AccountType = result.data!.AccountType,
-                Document = result.data!.Document
+                Id = result.Id,
+                FullName = result.FullName,
+                DisplayName = result.DisplayName,
+                PublicId = result.PublicId,
+                Email = result.Email,
+                AccountType = result.AccountType,
+                Document = result.Document
             }));
         }
 
@@ -109,14 +93,11 @@ namespace simplified_picpay.Controllers
             var id = _tokenService.GetAccounId(this.HttpContext);
             var result = await _accountService.AddFounds(id, updateFoundsDTO.Amount, cancellationToken);
 
-            if (!result.success)
-                return BadRequest(new ResultViewModel<string>(result.error!));
-
             return Ok(new ResultViewModel<NewAccountBalanceViewModel>(new NewAccountBalanceViewModel
             {
-                Id = result.data!.Id,
-                PublicId = result.data!.PublicId,
-                Balance = result.data!.CurrentBalance
+                Id = result.Id,
+                PublicId = result.PublicId,
+                Balance = result.CurrentBalance
             }));
         }
 
@@ -128,14 +109,11 @@ namespace simplified_picpay.Controllers
             var id = _tokenService.GetAccounId(this.HttpContext);
             var result = await _accountService.RemoveFounds(id, updateFoundsDTO.Amount, cancellationToken);
 
-            if (!result.success)
-                return BadRequest(new ResultViewModel<string>(result.error!));
-
             return Ok(new ResultViewModel<NewAccountBalanceViewModel>(new NewAccountBalanceViewModel
             {
-                Id = result.data!.Id,
-                PublicId = result.data!.PublicId,
-                Balance = result.data!.CurrentBalance
+                Id = result.Id,
+                PublicId = result.PublicId,
+                Balance = result.CurrentBalance
             }));
         }
 
@@ -146,10 +124,7 @@ namespace simplified_picpay.Controllers
             var id = _tokenService.GetAccounId(this.HttpContext);
             var result = await _accountService.DisableAccountAsync(id, cancellationToken);
 
-            if (!result.success)
-                return BadRequest(new ResultViewModel<string>(result.error!));
-
-            return Ok(new ResultViewModel<string>(data: result.data!));
+            return Ok(new ResultViewModel<string>(data: result));
         }
     }
 }
