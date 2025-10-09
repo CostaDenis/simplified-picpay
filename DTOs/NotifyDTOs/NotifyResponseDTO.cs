@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace simplified_picpay.DTOs.Notify
+namespace simplified_picpay.DTOs.NotifyDTOs
 {
     public class NotifyResponseDTO
     {

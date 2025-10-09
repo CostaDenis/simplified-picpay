@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using simplified_picpay.Data;
+using simplified_picpay.Exceptions.InfrastructureExceptions;
 using simplified_picpay.Repositories;
 using simplified_picpay.Repositories.Abstractions;
 using simplified_picpay.Services;
@@ -10,10 +11,10 @@ using simplified_picpay.Services.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new Exception("Connection string não encontrada!");
+    ?? throw new DatabaseConnectionStringNotFoundException("Connection string não encontrada!");
 
 var key = builder.Configuration["Jwt"]
-    ?? throw new Exception("Chave Jwt não encontrada!"); ;
+    ?? throw new JwtKeyNotFoundException("Chave Jwt não encontrada!"); ;
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {

@@ -1,5 +1,5 @@
 
-namespace simplified_picpay.Exceptions.AccountExceptions
+namespace simplified_picpay.Exceptions.TransactionExceptions
 {
     public class InsufficientFundsException(string error) : DomainException(error);
 }

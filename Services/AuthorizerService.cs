@@ -1,4 +1,4 @@
-using simplified_picpay.Dtos.Authorizer;
+using simplified_picpay.Dtos.AuthorizerDTOs;
 using simplified_picpay.Services.Abstractions;
 
 namespace simplified_picpay.Services

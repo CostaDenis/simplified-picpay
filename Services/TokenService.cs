@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using simplified_picpay.Exceptions.InfrastructureExceptions;
 using simplified_picpay.Services.Abstractions;
 
 namespace simplified_picpay.Services
@@ -22,7 +23,7 @@ namespace simplified_picpay.Services
             var key = _configuration["Jwt"];
 
             if (string.IsNullOrEmpty(key))
-                throw new Exception("Chave Jwt não encontrada!");
+                throw new JwtKeyNotFoundException("Chave Jwt não encontrada!");
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

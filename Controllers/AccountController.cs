@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using simplified_picpay.DTOs.Account;
+using simplified_picpay.DTOs.AccountDTOs;
 using simplified_picpay.Models;
-using simplified_picpay.Repositories.Abstractions;
 using simplified_picpay.Services.Abstractions;
 using simplified_picpay.Views.ViewModels;
 

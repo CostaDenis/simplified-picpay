@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace simplified_picpay.DTOs.Transaction
+namespace simplified_picpay.DTOs.TransactionDTOs
 {
     public class PaginationTransactionDTO
     {

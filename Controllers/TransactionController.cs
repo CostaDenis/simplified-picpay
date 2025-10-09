@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using simplified_picpay.DTOs.Transaction;
-using simplified_picpay.Models;
+using simplified_picpay.DTOs.TransactionDTOs;
 using simplified_picpay.Services.Abstractions;
 using simplified_picpay.Views.ViewModels;
 
@@ -25,18 +24,15 @@ namespace simplified_picpay.Controllers
             createTransactionDTO.PayerId = payerId;
             var result = await _transactionService.CreateTransactionAsync(createTransactionDTO, cancellationToken);
 
-            if (!result.success)
-                return BadRequest(new ResultViewModel<string>(result.error!));
-
             return Created(
-                            $"/transactions/{result.data!.Id}",
+                            $"/transactions/{result.Id}",
                             new ResultViewModel<TransactionViewModel>(
                             new TransactionViewModel
                             {
-                                Id = result.data.Id,
-                                PayerPublicId = result.data.PayerPublicId,
-                                PayeePublicId = result.data.PayeePublicId,
-                                Value = result.data.Value
+                                Id = result.Id,
+                                PayerPublicId = result.PayerPublicId,
+                                PayeePublicId = result.PayeePublicId,
+                                Value = result.Value
                             }));
         }
 
@@ -46,34 +42,30 @@ namespace simplified_picpay.Controllers
             var accountId = _tokenService.GetAccounId(this.HttpContext);
             var result = await _transactionService.GetTransactionByIdAsync(id, accountId, cancellationToken);
 
-            if (!result.success)
-                return NotFound(new ResultViewModel<string>(result.error!));
+            if (result == null)
+                return NotFound(new ResultViewModel<string>(data: "Nenhuma transação encontrada!"));
 
             return Ok(new ResultViewModel<TransactionViewModel>(new TransactionViewModel
             {
-                Id = result.data!.Id,
-                PayerPublicId = result.data.PayerPublicId,
-                PayeePublicId = result.data.PayeePublicId,
-                Value = result.data.Value
+                Id = result.Id,
+                PayerPublicId = result.PayerPublicId,
+                PayeePublicId = result.PayeePublicId,
+                Value = result.Value
             }));
         }
 
 
         [HttpGet]
-        public async Task<IActionResult> GetAllYourTransactionsAsync([FromBody] PaginationTransactionDTO paginationTransactionDTO,
-                                                                        CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllYourTransactionsAsync([FromBody] PaginationTransactionDTO paginationTransactionDTO, CancellationToken cancellationToken)
         {
             var id = _tokenService.GetAccounId(this.HttpContext);
-            var result = await _transactionService.GetAllYourTransactionsAsync(id, cancellationToken);
+            var result = await _transactionService.GetAllYourTransactionsAsync(id, paginationTransactionDTO, cancellationToken);
             var transactionsViewModel = new List<TransactionViewModel>();
 
-            if (!result.success)
-                return BadRequest(new ResultViewModel<string>(result.error!));
+            if (result == null)
+                return NotFound(new ResultViewModel<string>(data: "Nenhuma transação encontrada!"));
 
-            if (result.data!.Count == 0)
-                return Ok(new ResultViewModel<string>(data: "Nenhuma transação encontrada!"));
-
-            foreach (var transaction in result.data)
+            foreach (var transaction in result)
             {
                 transactionsViewModel.Add(new TransactionViewModel
                 {
@@ -89,19 +81,16 @@ namespace simplified_picpay.Controllers
 
         [HttpGet]
         [Route("received")]
-        public async Task<IActionResult> GetAllReceivedTransactionsAsync(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllReceivedTransactionsAsync([FromBody] PaginationTransactionDTO paginationTransactionDTO, CancellationToken cancellationToken)
         {
             var id = _tokenService.GetAccounId(this.HttpContext);
-            var result = await _transactionService.GetAllReceivedTransactionsAsync(id, cancellationToken);
+            var result = await _transactionService.GetAllReceivedTransactionsAsync(id, paginationTransactionDTO, cancellationToken);
             var transactionsViewModel = new List<TransactionViewModel>();
 
-            if (!result.success)
-                return BadRequest(new ResultViewModel<string>(result.error!));
+            if (result == null)
+                return NotFound(new ResultViewModel<string>(data: "Nenhuma transação encontrada!"));
 
-            if (result.data!.Count == 0)
-                return Ok(new ResultViewModel<string>(data: "Nenhuma transação encontrada!"));
-
-            foreach (var transaction in result.data)
+            foreach (var transaction in result)
             {
                 transactionsViewModel.Add(new TransactionViewModel
                 {
@@ -117,19 +106,16 @@ namespace simplified_picpay.Controllers
 
         [HttpGet]
         [Route("paid")]
-        public async Task<IActionResult> GetAllPaidTransactionsAsync(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllPaidTransactionsAsync([FromBody] PaginationTransactionDTO paginationTransactionDTO, CancellationToken cancellationToken)
         {
             var id = _tokenService.GetAccounId(this.HttpContext);
-            var result = await _transactionService.GetAllPaidTransactionsAsync(id, cancellationToken);
+            var result = await _transactionService.GetAllPaidTransactionsAsync(id, paginationTransactionDTO, cancellationToken);
             var transactionsViewModel = new List<TransactionViewModel>();
 
-            if (!result.success)
-                return BadRequest(new ResultViewModel<string>(result.error!));
-
-            if (result.data!.Count == 0)
+            if (result == null)
                 return Ok(new ResultViewModel<string>(data: "Nenhuma transação encontrada!"));
 
-            foreach (var transaction in result.data)
+            foreach (var transaction in result)
             {
                 transactionsViewModel.Add(new TransactionViewModel
                 {

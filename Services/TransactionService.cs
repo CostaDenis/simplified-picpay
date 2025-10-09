@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using simplified_picpay.Data;
-using simplified_picpay.DTOs.Transaction;
+using simplified_picpay.DTOs.TransactionDTOs;
 using simplified_picpay.Enums;
+using simplified_picpay.Exceptions;
+using simplified_picpay.Exceptions.TransactionExceptions;
 using simplified_picpay.Models;
 using simplified_picpay.Repositories.Abstractions;
 using simplified_picpay.Services.Abstractions;
@@ -9,37 +11,38 @@ using simplified_picpay.Services.Abstractions;
 namespace simplified_picpay.Services
 {
     public class TransactionService(ITransactionRepository transactionRepository,
-                                        IAccountService accountService,
                                         IAuthorizerService authorizerService,
                                         INotifyService notifyService,
                                         IAccountRepository accountRepository,
                                         AppDbContext appDbContext) : ITransactionService
     {
         private readonly ITransactionRepository _transactionRepository = transactionRepository;
-        private readonly IAccountService _accountService = accountService;
         private readonly IAuthorizerService _authorizerService = authorizerService;
         private readonly INotifyService _notifyService = notifyService;
         private readonly IAccountRepository _accountRepository = accountRepository;
         private readonly AppDbContext _appDbContext = appDbContext;
 
-        public async Task<(bool success, string? error, Transaction? data)> CreateTransactionAsync
-            (CreateTransactionDTO createTransactionDTO, CancellationToken cancellationToken = default)
+        public async Task<Transaction> CreateTransactionAsync(CreateTransactionDTO createTransactionDTO, CancellationToken cancellationToken = default)
         {
             if (!await _authorizerService.IsAuthorizedAsync(cancellationToken))
-                return (false, "Transação não autorizada pelo serviço externo!", null);
+                throw new TransactionNotAllowedException("Transação não autorizada pelo serviço externo!");
 
             var payer = await _accountRepository.GetAccountByIdAsync(createTransactionDTO.PayerId, cancellationToken);
             var payerPublicId = await _accountRepository.GetPublicIdAsync(payer!.Id);
             var payee = await _accountRepository.GetAccountByPublicIdAsync(createTransactionDTO.PayeePublicId, cancellationToken);
 
             if (payer == payee)
-                return (false, "A conta a se tranferir não pode ser a mesma que envia a tranferência!", null);
+                throw new SelfTransectionNotAllowedException("A conta a se tranferir não pode ser a mesma que envia a tranferência!");
 
             if (payee == null)
-                return (false, "Conta recebinte não encontrada!", null);
+                throw new PayeeNotFoundException("Conta recebedora não encontrada!");
 
             if (payer!.AccountType == EAccountType.Storekeeper.ToString().ToLower())
-                return (false, "Lojistas não são permitidos a fazer transferências, apenas podem receber!", null);
+                throw new StorekeeperTransectionNotAllowedException("Lojistas não são permitidos a fazer transferências, apenas podem receber!");
+
+            if (payee!.IsActive == false)
+                throw new PayeeAccountInactiveException("A conta destinada está desativada!");
+
 
             await using var transactionDatabase = await _appDbContext.Database.BeginTransactionAsync(cancellationToken);
 
@@ -48,10 +51,10 @@ namespace simplified_picpay.Services
                 var value = createTransactionDTO.Value;
 
                 if (value <= 0)
-                    return (false, "Valor inválido para transferência.", null);
+                    throw new ZeroTransactionValueNotAllowedException("O valor da transação deve ser maior que zero!");
 
                 if (payer.CurrentBalance < value)
-                    return (false, "Saldo insuficiente.", null);
+                    throw new InsufficientFundsException("Saldo insuficiente!");
 
                 payer.CurrentBalance -= value;
                 payee.CurrentBalance += value;
@@ -78,94 +81,77 @@ namespace simplified_picpay.Services
                     cancellationToken
                     );
 
-                return (true, null, transaction);
+                return transaction;
             }
             catch
             {
                 if (transactionDatabase.GetDbTransaction().Connection != null)
                     await transactionDatabase.RollbackAsync(cancellationToken);
 
-                return (false, "Erro interno ao fazer a transação", null);
+                throw new DomainException("Erro interno ao realizar transação!");
             }
         }
 
-        public async Task<(bool success, string? error, Transaction? data)> GetTransactionByIdAsync
-            (Guid transactionId, Guid accountId, CancellationToken cancellationToken = default)
+        public async Task<Transaction?> GetTransactionByIdAsync(Guid transactionId, Guid accountId, CancellationToken cancellationToken = default)
         {
             try
             {
                 var transaction = await _transactionRepository.GetTransactionAsync(transactionId, cancellationToken);
 
-                if (transaction == null)
-                    return (false, "Transação não encontrada!", null);
+                if (transaction != null &&
+                    transaction.PayerId != accountId && transaction.PayeeId != accountId)
+                    throw new ForbiddenTransactionAccessException("Não é possível consultar transações de terceiros!");
 
-                if (transaction.PayerId != accountId && transaction.PayeeId != accountId)
-                    return (false, "Não é possível consultar transações de terceiros!", null);
-
-                return (true, null, transaction);
+                return transaction;
             }
             catch
             {
-                return (false, "Erro interno ao consultar a transação!", null);
+                throw new DomainException("Erro interno ao consultar a transação!");
             }
         }
 
-        public async Task<(bool success, string? error, List<Transaction>? data)> GetAllYourTransactionsAsync
-            (Guid id, PaginationTransactionDTO paginationTransactionDTO, CancellationToken cancellationToken = default)
+        public async Task<List<Transaction>?> GetAllYourTransactionsAsync(Guid id, PaginationTransactionDTO paginationTransactionDTO, CancellationToken cancellationToken = default)
         {
             try
             {
                 var transactions = await _transactionRepository.GetAllYourTransactionsAsync
                     (id, paginationTransactionDTO.Skip, paginationTransactionDTO.Take, cancellationToken);
 
-
-                if (transactions == null)
-                    return (true, null, data: transactions);
-
-                return (true, null, transactions);
+                return transactions;
             }
             catch
             {
-                return (false, "Erro interno ao consultar as transações de sua conta!", null);
+                throw new DomainException("Erro interno ao consultar as transações de sua conta!");
             }
         }
 
-        public async Task<(bool success, string? error, List<Transaction>? data)> GetAllReceivedTransactionsAsync
-            (Guid id, PaginationTransactionDTO paginationTransactionDTO, CancellationToken cancellationToken = default)
+        public async Task<List<Transaction>?> GetAllReceivedTransactionsAsync(Guid id, PaginationTransactionDTO paginationTransactionDTO, CancellationToken cancellationToken = default)
         {
             try
             {
                 var transactions = await _transactionRepository.GetAllReceivedTransactionsAsync
                     (id, paginationTransactionDTO.Skip, paginationTransactionDTO.Take, cancellationToken);
 
-
-                if (transactions == null)
-                    return (true, null, data: transactions);
-
-                return (true, null, transactions);
+                return transactions;
             }
             catch
             {
-                return (false, "Erro interno ao consultar as transações recebidas de sua conta!", null);
+                throw new DomainException("Erro interno ao consultar as transações de sua conta!");
             }
         }
 
-        public async Task<(bool success, string? error, List<Transaction>? data)> GetAllPaidTransactionsAsync
-            (Guid id, PaginationTransactionDTO paginationTransactionDTO, CancellationToken cancellationToken = default)
+        public async Task<List<Transaction>?> GetAllPaidTransactionsAsync(Guid id, PaginationTransactionDTO paginationTransactionDTO, CancellationToken cancellationToken = default)
         {
             try
             {
                 var transactions = await _transactionRepository.GetAllPaidTransactionsAsync
                     (id, paginationTransactionDTO.Skip, paginationTransactionDTO.Take, cancellationToken);
 
-                if (transactions == null)
-                    return (true, null, data: transactions);
-
-                return (true, null, transactions);
+                return transactions;
             }
             catch
             {
-                return (false, "Erro interno ao consultar as transações feitas de sua conta!", null);
+                throw new DomainException("Erro interno ao consultar as transações de sua conta!");
             }
         }
 

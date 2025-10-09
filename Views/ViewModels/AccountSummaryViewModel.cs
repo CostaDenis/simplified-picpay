@@ -1,5 +1,4 @@
 
-
 namespace simplified_picpay.Views.ViewModels
 {
     public class AccountSummaryViewModel

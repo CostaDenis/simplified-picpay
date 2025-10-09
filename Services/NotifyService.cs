@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using simplified_picpay.DTOs.Notify;
+using simplified_picpay.DTOs.NotifyDTOs;
 using simplified_picpay.Services.Abstractions;
 
 namespace simplified_picpay.Services

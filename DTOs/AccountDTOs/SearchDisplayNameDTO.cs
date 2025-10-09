@@ -1,6 +1,5 @@
 
-
-namespace simplified_picpay.DTOs.Account
+namespace simplified_picpay.DTOs.AccountDTOs
 {
     public class SearchDisplayNameDTO
     {

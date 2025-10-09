@@ -1,8 +1,9 @@
 using System.Data.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using simplified_picpay.DTOs.Account;
+using simplified_picpay.DTOs.AccountDTOs;
 using simplified_picpay.Enums;
+using simplified_picpay.Exceptions;
 using simplified_picpay.Exceptions.AccountExceptions;
 using simplified_picpay.Models;
 using simplified_picpay.Repositories.Abstractions;
