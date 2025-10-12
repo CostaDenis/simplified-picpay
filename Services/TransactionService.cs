@@ -75,6 +75,7 @@ namespace simplified_picpay.Services
                 await _appDbContext.SaveChangesAsync(cancellationToken);
                 await transactionDatabase.CommitAsync(cancellationToken);
 
+                //Mock indisponível
                 _ = _notifyService.SendNotificationAsync(
                     email: payee.Email,
                     message: $"Você recebeu {value} de {payer.DisplayName}!",
