@@ -84,6 +84,13 @@ namespace simplified_picpay.Services
 
                 return transaction;
             }
+            catch (DomainException)
+            {
+                if (transactionDatabase.GetDbTransaction().Connection != null)
+                    await transactionDatabase.RollbackAsync(cancellationToken);
+
+                throw;
+            }
             catch
             {
                 if (transactionDatabase.GetDbTransaction().Connection != null)
@@ -104,6 +111,10 @@ namespace simplified_picpay.Services
                     throw new ForbiddenTransactionAccessException("Não é possível consultar transações de terceiros!");
 
                 return transaction;
+            }
+            catch (DomainException)
+            {
+                throw;
             }
             catch
             {

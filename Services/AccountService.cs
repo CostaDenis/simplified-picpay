@@ -92,9 +92,9 @@ namespace simplified_picpay.Services
             {
                 return await _accountRepository.CreateAsync(account, cancellationToken);
             }
-            catch (DbException)
+            catch (DbUpdateException)
             {
-                throw new DuplicateAccountException("Email ou DisplayName já registrado. Use outro!");
+                throw new DuplicateAccountException("Email, DisplayName ou Documento já registrado. Use outro!");
             }
             catch
             {
@@ -119,7 +119,7 @@ namespace simplified_picpay.Services
             }
             catch (DbUpdateException)
             {
-                throw new DuplicateAccountException("Email ou DisplayName já registrado. Use outro!");
+                throw new DuplicateAccountException("Email, DisplayName ou Documento já registrado. Use outro!");
             }
             catch
             {

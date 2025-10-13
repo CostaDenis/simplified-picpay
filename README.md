@@ -1,5 +1,4 @@
 # simplified-picpay
-Este projeto é uma
 
 Este projeto é uma **implementação simplificada da API do PicPay**, desenvolvida em **.NET**.  
 Foi inspirado em um <a href="https://github.com/PicPay/picpay-desafio-backend">**teste técnico real do PicPay para desenvolvedores backend**</a>, criado por iniciativa própria com o objetivo de praticar com PostgreSQL, arquitetura limpa, organização de código e integração entre camadas.
@@ -41,9 +40,6 @@ Foi inspirado em um <a href="https://github.com/PicPay/picpay-desafio-backend">*
 - Transação com rollback:
     - Toda operação de transferência é executada dentro de uma transação atômica;
     - Em caso de qualquer falha (ex: autorização negada, exceção), o valor é revertido automaticamente para o pagador;
-
-## Observação
-Na hora que estava desenvolvendo, o mock proposto no desafio está indisponível, então é bem possível que aconteça a mesma coisa caso for testar
 
 ## Alteração no modelo de endpoint para realizar transação
 O modelo original de transação utilizava o ID (chave primária) das contas (accounts), o que poderia representar um risco de segurança, já que exporia identificadores diretos do banco de dados nas requisições.
@@ -87,11 +83,10 @@ simplified-picpay/
  ├── Exceptions/            # Exceções personalizadas
  ├── Models/                # Models da aplicação
  ├── Repositories/          # Acesso à base de dados
-     ├── Abstractions/          # Interfaces dos repositórios
+    ├── Abstractions/          # Interfaces dos repositórios
  ├── Services/              # Regras de negócio e lógica da aplicação
     ├── Abstractions/          # Interfaces dos services
  ├── Views/                 # Modelos de retorno
- ├── appsettings.json       # Configurações da aplicação
  ├── Program.cs             # Ponto de entrada da aplicação
  └── simplified-picpay.csproj
 ```
@@ -181,8 +176,16 @@ dotnet watch run
 
 ## Observações finais
 
-### Mock indisponível 
+### Mock de notificação pelo Email indisponível 
 Durante o desenvolvimento, o mock proposto no desafio estava indisponível. Portanto, é possível que ele continue inacessível caso você tente testar a aplicação.
+
+```bash
+_ = _notifyService.SendNotificationAsync(
+        email: payee.Email,
+        message: $"Você recebeu {value} de {payer.DisplayName}!",
+        cancellationToken
+        );
+```
 
 ### Testando a aplicação
 Para testar a API, utilizei o Postman. Todas as requisições que utilizei estão disponíveis na pasta Postman. Nela, há um arquivo .json que pode ser importado diretamente no Postman para reproduzir a coleção de testes que usei.
