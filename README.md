@@ -72,7 +72,7 @@ Dessa forma, os IDs internos nunca são expostos.
 A aplicação obtém automaticamente o public_id do payer (usuário logado) a partir do token JWT, e apenas o public_id do destinatário (payee) é enviado na requisição.
 Isso garante uma comunicação mais segura e desacoplada da estrutura interna do banco de dados.
 
-## 🧩 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```bash
 simplified-picpay/
@@ -176,8 +176,11 @@ dotnet watch run
 
 ## Observações finais
 
+### Autenticação
+A maioria dos endpoints da API requer autenticação utilizando Bearer Token. Após realizar o login com sucesso, a API retorna um token JWT que representa a sessão do usuário autenticado.
+
 ### Mock de notificação pelo Email indisponível 
-Durante o desenvolvimento, o mock proposto no desafio estava indisponível. Portanto, é possível que ele continue inacessível caso você tente testar a aplicação.
+Durante o desenvolvimento, o mock proposto no desafio estava indisponível. Portanto, é bem provável que ele continue inacessível caso você tente testar a aplicação.
 
 ```bash
 _ = _notifyService.SendNotificationAsync(

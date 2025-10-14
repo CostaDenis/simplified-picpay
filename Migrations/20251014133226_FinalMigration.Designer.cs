@@ -12,8 +12,8 @@ using simplified_picpay.Data;
 namespace simplified_picpay.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250929172719_v5")]
-    partial class v5
+    [Migration("20251014133226_FinalMigration")]
+    partial class FinalMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,7 +50,9 @@ namespace simplified_picpay.Migrations
 
                     b.Property<string>("Document")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(14)
+                        .HasColumnType("varchar")
+                        .HasColumnName("document");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -86,6 +88,10 @@ namespace simplified_picpay.Migrations
                         .IsUnique()
                         .HasDatabaseName("ux_accounts_display_name");
 
+                    b.HasIndex("Document")
+                        .IsUnique()
+                        .HasDatabaseName("ux_accounts_document");
+
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasDatabaseName("ux_accounts_email");
@@ -105,10 +111,24 @@ namespace simplified_picpay.Migrations
                         .HasColumnName("id");
 
                     b.Property<Guid>("PayeeId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("payee_id");
+
+                    b.Property<string>("PayeePublicId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar")
+                        .HasColumnName("payee_public_id");
 
                     b.Property<Guid>("PayerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("payer_id");
+
+                    b.Property<string>("PayerPublicId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar")
+                        .HasColumnName("payer_public_id");
 
                     b.Property<decimal>("Value")
                         .HasColumnType("numeric(18,2)")

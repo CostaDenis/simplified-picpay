@@ -23,6 +23,9 @@ namespace simplified_picpay.Data.Mappings
                 .HasConstraintName("fk_transactions_payer_id")
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Property(t => t.PayerId)
+                .HasColumnName("payer_id");
+
             builder.Property(t => t.PayerPublicId)
                 .HasColumnName("payer_public_id")
                 .HasColumnType("varchar")
@@ -34,6 +37,9 @@ namespace simplified_picpay.Data.Mappings
                 .HasForeignKey(t => t.PayeeId)
                 .HasConstraintName("fk_transactions_payee_id")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(t => t.PayeeId)
+                .HasColumnName("payee_id");
 
             builder.Property(t => t.PayeePublicId)
                 .HasColumnName("payee_public_id")

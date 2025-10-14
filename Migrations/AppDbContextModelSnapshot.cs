@@ -108,7 +108,8 @@ namespace simplified_picpay.Migrations
                         .HasColumnName("id");
 
                     b.Property<Guid>("PayeeId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("payee_id");
 
                     b.Property<string>("PayeePublicId")
                         .IsRequired()
@@ -117,7 +118,8 @@ namespace simplified_picpay.Migrations
                         .HasColumnName("payee_public_id");
 
                     b.Property<Guid>("PayerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("payer_id");
 
                     b.Property<string>("PayerPublicId")
                         .IsRequired()
