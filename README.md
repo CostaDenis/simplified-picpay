@@ -83,7 +83,7 @@ simplified-picpay/
  ├── Exceptions/            # Exceções personalizadas
  ├── Models/                # Models da aplicação
  ├── Repositories/          # Acesso à base de dados
-    ├── Abstractions/          # Interfaces dos repositórios
+    ├── Abstractions/          # Interfaces dos repositories
  ├── Services/              # Regras de negócio e lógica da aplicação
     ├── Abstractions/          # Interfaces dos services
  ├── Views/                 # Modelos de retorno
@@ -118,6 +118,11 @@ simplified-picpay/
 ```
 
 ## Endpoints
+
+### Home
+| Método | Rota                   | Descrição                           | Autenticação |
+|--------|------------------------|-------------------------------------|--------------|
+| GET    | `/`   | Retorna status da API     | ❌           |
 
 ### Accounts
 
