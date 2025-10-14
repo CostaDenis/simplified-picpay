@@ -146,13 +146,13 @@ simplified-picpay/
 | GET    | `/transactions/received`   | Lista transações recebidas pelo usuário logado     | ✅           |
 | GET    | `/transactions/paid`   | Lista transações enviadas pelo usuário logado     | ✅           |
 
-### Pré requisitos para rodar localment
+### Pré requisitos para rodar localmente
 
 - Ter o <a href="https://dotnet.microsoft.com/pt-br/download/dotnet/9.0">.NET 9.0</a> na máquina.
 
 - Ter o PostgreSQL rodando localmente.
 
-- Ter instalado o Entity Framework em sua máquina
+- Ter instalado o Entity Framework em sua máquina.
     ```bash
     dotnet tool install --global dotnet-ef
     ```
