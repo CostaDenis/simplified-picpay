@@ -1,5 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
+COPY simplified-picpay.csproj . 
+RUN dotnet restore "./simplified-picpay.csproj"
 COPY . .
 RUN dotnet restore
 RUN dotnet publish -c Release -o /app
