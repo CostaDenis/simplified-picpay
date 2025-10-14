@@ -15,7 +15,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new DatabaseConnectionStringNotFoundException("Connection string não encontrada!");
 
 var key = builder.Configuration["Jwt"]
-    ?? throw new JwtKeyNotFoundException("Chave Jwt não encontrada!"); ;
+    ?? throw new JwtKeyNotFoundException("Chave Jwt não encontrada!");
+
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
