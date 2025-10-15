@@ -1,20 +1,32 @@
 # simplified-picpay
-Este projeto foi inspirado em um teste técnico real do PicPay para desenvolvedores backend, e ampliado por iniciativa própria com o objetivo de aprimorar a proposta original e incluir novas funcionalidades.
+Este projeto foi inspirado em no <a href="https://github.com/PicPay/picpay-desafio-backend">teste técnico real do PicPay para desenvolvedores backend</a>, e ampliado por iniciativa própria com o objetivo de aprimorar a proposta original e incluir novas funcionalidades.
 
-Desenvolvido em .NET, o projeto teve como foco a prática de conceitos de arquitetura limpa, organização de código, integração entre camadas e uso do PostgreSQL como banco de dados.
+Desenvolvido em .NET, o projeto teve como foco a prática de conceitos de arquitetura limpa, densenvolvimento de API REST, organização de código, integração entre camadas e o uso do PostgreSQL como banco de dados.
 
 ---
+
+## Deploy
+A API está hospedada na Render, utilizando um banco PostgreSQL instanciado pelo Supabase.
+Caso ocorra alguma instabilidade nas requisições, isso pode estar relacionado às limitações do plano free tier do Supabase, utilizado neste ambiente.
+
+- URL da API: https://simplified-picpay.onrender.com
+
+- Banco de dados: PostgreSQL (Supabase)
+
+- Documentação Swagger: https://simplified-picpay.onrender.com/swagger
 
 ## Tecnologias Utilizadas
 
 ![.NET](https://img.shields.io/badge/DotNet-512BD4.svg?style=for-the-badge&logo=dotnet&logoColor=ffffff)
 ![C#](https://img.shields.io/badge/CSharp-512BD4.svg?style=for-the-badge&logo=sharp&logoColor=ffffff)
 ![Entity Framework](https://img.shields.io/badge/Entity_Framework-512BD4.svg?style=for-the-badge)
-![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=for-the-badge)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-396c94.svg?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=for-the-badge&logo=docker&logoColor=ffffff)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-396c94.svg?style=for-the-badge&logo=postgresql&logoColor=ffffff)
 ![Postman](https://img.shields.io/badge/Postman-ff713d.svg?style=for-the-badge&logo=postman&logoColor=ffffff)
 ![Swagger](https://img.shields.io/badge/Swagger-%85ea2d.svg?style=for-the-badge&logo=swagger&logoColor=ffffff)
 ![JWT](https://img.shields.io/badge/JWT-1b1b33.svg?style=for-the-badge&logoColor=ffffff)
+![Render](https://img.shields.io/badge/Render-%46E3B7.svg?style=for-the-badge&logo=render&logoColor=ffffff)
+![Supabase](https://img.shields.io/badge/Supabase-%232323.svg?style=for-the-badge&logo=supabase&logoColor=44cf93)
 
 ---
 
@@ -23,7 +35,7 @@ Desenvolvido em .NET, o projeto teve como foco a prática de conceitos de arquit
 - Cadastro e autenticação de usuários (usuário comum e lojista);
     - Usuário comum utiliza CPF (11 caracteres);
     - Lojista utiliza CNPJ (14 caracteres);
-    - CPF/CNPJ e e-mail são únicos no sistema;
+    - CPF/CNPJ, DisplayName e e-mail são únicos no sistema;
     - As senhas são armazenadas de forma segura (hash);
 
 - Transferência de valores entre contas;
