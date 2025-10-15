@@ -9,4 +9,4 @@ RUN dotnet publish -c Release -o /app
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 COPY --from=build /app .
-ENTRYPOINT [ "dotnet", "simplified_picpay.dll" ]
+ENTRYPOINT [ "dotnet", "simplified-picpay.dll" ]
