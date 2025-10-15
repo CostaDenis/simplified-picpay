@@ -1,5 +1,5 @@
 # simplified-picpay
-Este projeto foi inspirado em no <a href="https://github.com/PicPay/picpay-desafio-backend">teste técnico real do PicPay para desenvolvedores backend</a>, e ampliado por iniciativa própria com o objetivo de aprimorar a proposta original e incluir novas funcionalidades.
+Este projeto foi inspirado em <a href="https://github.com/PicPay/picpay-desafio-backend">teste técnico real do PicPay para desenvolvedores backend</a>, e ampliado por iniciativa própria com o objetivo de aprimorar a proposta original e incluir novas funcionalidades.
 
 Desenvolvido em .NET, o projeto teve como foco a prática de conceitos de arquitetura limpa, densenvolvimento de API REST, organização de código, integração entre camadas e o uso do PostgreSQL como banco de dados.
 
